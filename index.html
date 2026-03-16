@@ -17,19 +17,20 @@
   <!-- 簽名板 -->
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
+colors: {
   hanamu: {
-    green: "#C88F97",   // 主色：乾燥玫瑰粉（原本偏綠，改更像花沐）
-    wood:  "#9B7A5E",   // 暖棕（保留，跟你現在一致）
-    bg:    "#FFF7F5",   // 奶油底（更柔）
-    dark:  "#2F2F2F",   // 文字深色
-    soft:  "#FFFFFF",   // 白
-    accent:"#E8C66A",   // 金色點綴
-    red:   "#D67D7D"    // 警示紅（保留）
+    green: "#C48C93",  // ✅ 主色：粉霧玫瑰（全站主要按鈕/標籤）
+    wood:  "#9B7A5E",  // 溫暖棕（副標/輔色）
+    bg:    "#FFF7F5",
+    dark:  "#2B2B2B",
+    soft:  "#FFFFFF",
+    accent:"#E8C66A",
+    red:   "#D67D7D"
   }
 },
           fontFamily: {
@@ -41,25 +42,32 @@
   </script>
 
   <style>
-    :root{
-      --bg: #FFF7F5;
-      --text: #2F2F2F;
-    }
-    body{
-      font-family: "Zen Maru Gothic","Noto Sans TC",sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-      -webkit-tap-highlight-color: transparent;
-      overflow-x: hidden;
-    }
+:root{
+  --bg: #FFF7F5;
+  --text: #2B2B2B;
+}
+body{
+  font-family: "Zen Maru Gothic","Noto Sans TC",sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+
+  /* ✅ 粉霧漸層底：不靠毛玻璃，也有氛圍 */
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(196,140,147,.18) 0%, rgba(196,140,147,0) 42%),
+    radial-gradient(circle at 88% 82%, rgba(232,198,106,.14) 0%, rgba(232,198,106,0) 45%),
+    radial-gradient(circle at 55% 45%, rgba(196,140,147,.10) 0%, rgba(196,140,147,0) 55%);
+  background-attachment: fixed;
+}
     /* 宿洗感：柔霧玻璃卡 */
     .glass-card{
       background: rgba(255,255,255,.70);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255,255,255,.9);
-      box-shadow: 0 12px 38px rgba(200, 143, 151, .16);
+      box-shadow: 0 12px 38px rgba(196, 140, 147, .16);
       border-radius: 1.75rem;
     }
     /* 內頁可愛卡 */
@@ -114,38 +122,81 @@
     }
     .modal-body{
       overflow:auto;
-      background: #FAF7F1;
+background: var(--bg);
       padding: 1.25rem;
     }
     .fullscreen-signature{
       position:fixed; inset:0;
       z-index: 80;
-      background: #FAF7F1;
+background: var(--bg);
       display:none;
       flex-direction: column;
       touch-action: none;
       overscroll-behavior: contain;
     }
-    /* ✅ 花沐：主 CTA 按鈕（更像萌寵的質感） */
+    /* ✅ 花沐：粉霧玫瑰 CTA（柔和、乾淨、不要粉→綠跳色） */
 .submit-cta{
-  background: linear-gradient(90deg, #C48C93 0%, #5E7D6A 100%);
+  background: linear-gradient(90deg, #D7A1AA 0%, #C48C93 45%, #B97482 100%);
   border-radius: 9999px;
-  box-shadow: 0 18px 42px rgba(94, 125, 106, 0.22);
+  border: 1px solid rgba(255,255,255,.55);
+  box-shadow:
+    0 18px 42px rgba(196, 140, 147, 0.32),
+    inset 0 1px 0 rgba(255,255,255,.40);
   position: relative;
   overflow: hidden;
   transform: translateZ(0);
+  transition: transform .18s ease, box-shadow .25s ease, filter .25s ease;
 }
 .submit-cta::before{
   content:"";
   position:absolute;
-  inset:-40% -30%;
-  background: linear-gradient(45deg, rgba(255,255,255,0) 40%, rgba(255,255,255,.35) 50%, rgba(255,255,255,0) 60%);
+  inset:-45% -35%;
+  background: linear-gradient(
+    45deg,
+    rgba(255,255,255,0) 42%,
+    rgba(255,255,255,.38) 50%,
+    rgba(255,255,255,0) 58%
+  );
   transform: translateX(-60%);
-  transition: transform .8s ease;
+  transition: transform .85s ease;
 }
 .submit-cta:hover::before{ transform: translateX(60%); }
-.submit-cta:hover{ box-shadow: 0 24px 60px rgba(94, 125, 106, 0.28); transform: translateY(-2px); }
-.submit-cta:active{ transform: scale(.98); }
+.submit-cta:hover{
+  transform: translateY(-2px);
+  filter: saturate(1.05);
+  box-shadow:
+    0 26px 64px rgba(196, 140, 147, 0.38),
+    inset 0 1px 0 rgba(255,255,255,.42);
+}
+.submit-cta:active{ transform: translateY(0) scale(.985); }
+.submit-cta:focus-visible{
+  outline: none;
+  box-shadow:
+    0 26px 64px rgba(196, 140, 147, 0.38),
+    0 0 0 4px rgba(196, 140, 147, .22);
+}
+/* ✅ 桌機效能：取消毛玻璃（保留手機），避免 backdrop-filter 吃效能 */
+@media (min-width: 768px){
+  /* 首頁大卡（原本 glass-card）改成「實心柔霧卡」 */
+  .glass-card{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255,255,255,.92) !important;
+    border: 1px solid rgba(196,140,147,.18) !important;
+  }
+
+  /* 頂部導覽列取消 blur */
+  header{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 條款 modal 背景遮罩取消 blur */
+  .modal-backdrop{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
   </style>
 </head>
 
@@ -309,112 +360,266 @@
     <form id="contractForm" class="mt-6 space-y-6">
 
       <!-- 飼主資料 -->
-      <section class="cute-card p-7 md:p-8 space-y-5">
-        <div class="flex items-center gap-3 border-b-2 border-dashed border-hanamu-wood/10 pb-4">
-          <div class="text-2xl">👤</div>
-          <h3 class="text-lg font-black text-hanamu-dark">飼主基本資料</h3>
-        </div>
+<section class="cute-card p-7 md:p-8 space-y-5" id="secOwner">
+  <div class="flex items-center gap-3 border-b-2 border-dashed border-hanamu-wood/10 pb-4">
+    <div class="text-2xl">👤</div>
+    <h3 class="text-lg font-black text-hanamu-dark">飼主基本資料</h3>
+  </div>
 
-        <div class="grid md:grid-cols-2 gap-4">
-          <div>
-            <label class="text-sm font-black text-hanamu-wood">飼主姓名 <span class="text-red-500">*</span></label>
-            <input name="owner_name" required class="mt-2 w-full cute-input px-4 py-3" placeholder="請輸入全名" />
-          </div>
-          <div>
-            <label class="text-sm font-black text-hanamu-wood">聯絡電話 <span class="text-red-500">*</span></label>
-            <input name="phone" required inputmode="numeric" class="mt-2 w-full cute-input px-4 py-3" placeholder="0912345678" />
-          </div>
-          <div class="md:col-span-2">
-            <label class="text-sm font-black text-hanamu-wood">Email（選填）</label>
-            <input name="email" type="email" class="mt-2 w-full cute-input px-4 py-3" placeholder="若要寄送契約副本可填寫" />
-          </div>
-        </div>
-      </section>
+  <div class="grid md:grid-cols-2 gap-4">
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">飼主姓名 <span class="text-red-500">*</span></label>
+      <input name="owner_name" required class="mt-2 w-full cute-input px-4 py-3" placeholder="請輸入姓名" />
+    </div>
 
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">電子信箱 <span class="text-red-500">*</span></label>
+      <input name="owner_email" type="email" required class="mt-2 w-full cute-input px-4 py-3" placeholder="example@mail.com" />
+    </div>
+
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">身分證字號 <span class="text-red-500">*</span></label>
+      <input name="owner_id" required maxlength="10" autocapitalize="characters"
+             class="mt-2 w-full cute-input px-4 py-3 tracking-wider"
+             placeholder="A123456789" />
+    </div>
+
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">
+        聯絡手機 <span class="text-red-500">*</span>
+        <span class="ml-1 text-[11px] font-black text-hanamu-green/90">(輸入後可搜尋紀錄)</span>
+      </label>
+
+      <div class="mt-2 flex gap-2 items-stretch">
+        <input name="owner_phone" required inputmode="numeric" maxlength="10"
+               class="w-full cute-input px-4 py-3 tracking-widest text-base"
+               placeholder="09xxxxxxxx"
+               oninput="digitsOnly(this)" />
+
+        <button type="button" id="searchBtn"
+                onclick="searchOldCustomer()"
+                class="shrink-0 px-4 rounded-2xl bg-hanamu-green text-white font-black shadow-lg shadow-hanamu-green/20 active:scale-[0.98] transition flex flex-col items-center justify-center min-w-[92px]">
+          <i data-lucide="search" class="w-5 h-5"></i>
+          <span class="text-[10px] mt-1">搜尋舊客</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="text-sm font-black text-hanamu-wood">通訊地址 <span class="text-red-500">*</span></label>
+      <input name="owner_address" required class="mt-2 w-full cute-input px-4 py-3" placeholder="請輸入地址" />
+    </div>
+
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">緊急聯絡人 <span class="text-red-500">*</span></label>
+      <input name="emergency_name" required class="mt-2 w-full cute-input px-4 py-3" placeholder="姓名" />
+    </div>
+
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">緊急電話 <span class="text-red-500">*</span></label>
+      <input name="emergency_phone" required inputmode="numeric"
+             class="mt-2 w-full cute-input px-4 py-3"
+             placeholder="電話"
+             oninput="digitsOnly(this)" />
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="text-sm font-black text-hanamu-wood">指定就醫醫院</label>
+      <input name="hospital" class="mt-2 w-full cute-input px-4 py-3" placeholder="若無則送交特約醫院" />
+    </div>
+  </div>
+</section>
       <!-- 寵物資料 -->
-      <section class="cute-card p-7 md:p-8 space-y-5">
-        <div class="flex items-center gap-3 border-b-2 border-dashed border-hanamu-wood/10 pb-4">
-          <div class="text-2xl">🐾</div>
-          <h3 class="text-lg font-black text-hanamu-dark">寵物資料</h3>
-        </div>
+<section class="cute-card p-7 md:p-8 space-y-5" id="secPet">
+  <div class="flex items-center gap-3 border-b-2 border-dashed border-hanamu-wood/10 pb-4">
+    <div class="text-2xl">🐾</div>
+    <h3 class="text-lg font-black text-hanamu-dark">寵物詳細資料</h3>
+  </div>
 
-        <div class="grid md:grid-cols-2 gap-4">
-          <div>
-            <label class="text-sm font-black text-hanamu-wood">寵物名字 <span class="text-red-500">*</span></label>
-            <input name="pet_name" required class="mt-2 w-full cute-input px-4 py-3" />
-          </div>
-          <div>
-            <label class="text-sm font-black text-hanamu-wood">品種 <span class="text-red-500">*</span></label>
-            <input name="breed" required class="mt-2 w-full cute-input px-4 py-3" />
-          </div>
-          <div>
-            <label class="text-sm font-black text-hanamu-wood">體重(kg) <span class="text-red-500">*</span></label>
-            <input name="weight" required type="number" step="0.1" class="mt-2 w-full cute-input px-4 py-3" />
-          </div>
-          <div>
-            <label class="text-sm font-black text-hanamu-wood">年齡 <span class="text-red-500">*</span></label>
-            <input name="age" required class="mt-2 w-full cute-input px-4 py-3" placeholder="例如：2歲 / 6個月" />
-          </div>
-        </div>
-      </section>
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="md:col-span-2">
+      <label class="text-sm font-black text-hanamu-wood">寵物名字 <span class="text-red-500">*</span></label>
+      <input name="pet_name" required class="mt-2 w-full cute-input px-4 py-3" placeholder="毛孩名字" />
+    </div>
 
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">品種</label>
+      <input name="pet_breed" class="mt-2 w-full cute-input px-4 py-3" placeholder="例：貴賓" />
+    </div>
+
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">花色</label>
+      <input name="pet_color" class="mt-2 w-full cute-input px-4 py-3" placeholder="例：棕白" />
+    </div>
+
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">寵物年齡 <span class="text-red-500">*</span></label>
+      <div class="mt-2 flex items-center gap-2">
+        <input name="pet_age" required type="number" min="0" inputmode="numeric"
+               class="w-full cute-input px-4 py-3"
+               placeholder="請輸入數字" />
+        <span class="text-sm font-black text-hanamu-dark">歲</span>
+      </div>
+    </div>
+
+    <div>
+      <label class="text-sm font-black text-hanamu-wood">晶片號碼 <span class="text-red-500">*</span></label>
+      <div class="mt-2 flex gap-2">
+        <select name="chip_status" id="chipStatus" onchange="toggleChipInput()"
+                class="cute-input px-4 py-3 w-[150px] font-black">
+          <option value="has_chip">有晶片</option>
+          <option value="unknown">有晶片(號碼不詳)</option>
+          <option value="no_chip">無晶片</option>
+        </select>
+        <input name="pet_chip" id="petChip"
+               class="w-full cute-input px-4 py-3"
+               placeholder="請輸入10或15碼數字"
+               inputmode="numeric"
+               oninput="digitsOnly(this)" />
+      </div>
+      <div class="text-[11px] font-bold text-gray-500 mt-2">有晶片時請填 10 或 15 碼數字</div>
+    </div>
+
+    <!-- 性別 -->
+    <div class="md:col-span-2">
+      <label class="text-sm font-black text-hanamu-wood">性別 <span class="text-red-500">*</span></label>
+      <div class="mt-2 grid grid-cols-2 gap-3">
+        <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center justify-center font-black cursor-pointer">
+          <input type="radio" name="pet_sex" value="公" class="mr-2 accent-hanamu-green" required> 公
+        </label>
+        <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center justify-center font-black cursor-pointer">
+          <input type="radio" name="pet_sex" value="母" class="mr-2 accent-hanamu-green" required> 母
+        </label>
+      </div>
+    </div>
+
+    <!-- 結紮/親人/親狗/攻擊性/病史 -->
+    <div class="md:col-span-2 grid md:grid-cols-3 gap-3">
+      <div>
+        <label class="text-sm font-black text-hanamu-wood">結紮 <span class="text-red-500">*</span></label>
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="is_neutered" value="是" class="mr-2 accent-hanamu-green" required> 是
+          </label>
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="is_neutered" value="否" class="mr-2 accent-hanamu-green" required> 否
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-sm font-black text-hanamu-wood">親人 <span class="text-red-500">*</span></label>
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="is_friendly" value="是" class="mr-2 accent-hanamu-green" required> 是
+          </label>
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="is_friendly" value="否" class="mr-2 accent-hanamu-green" required> 否
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-sm font-black text-hanamu-wood">親狗 <span class="text-red-500">*</span></label>
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="is_dog_friendly" value="是" class="mr-2 accent-hanamu-green" required> 是
+          </label>
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="is_dog_friendly" value="否" class="mr-2 accent-hanamu-green" required> 否
+          </label>
+        </div>
+      </div>
+
+      <div class="md:col-span-3">
+        <label class="text-sm font-black text-hanamu-wood">具攻擊性 <span class="text-red-500">*</span></label>
+        <div class="mt-2 grid grid-cols-2 gap-3">
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="is_aggressive" value="是" class="mr-2 accent-hanamu-green" required> 是
+          </label>
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="is_aggressive" value="否" class="mr-2 accent-hanamu-green" required> 否
+          </label>
+        </div>
+      </div>
+
+      <div class="md:col-span-3">
+        <label class="text-sm font-black text-hanamu-wood">過往病史 <span class="text-red-500">*</span></label>
+        <div class="mt-2 grid grid-cols-2 gap-3">
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="has_history" value="有" class="mr-2 accent-hanamu-green" required> 有
+          </label>
+          <label class="p-3 rounded-2xl border-2 border-gray-200 bg-white font-black flex justify-center cursor-pointer">
+            <input type="radio" name="has_history" value="無" class="mr-2 accent-hanamu-green" required> 無
+          </label>
+        </div>
+        <textarea name="history_notes" class="mt-3 w-full cute-input px-4 py-3" rows="2" placeholder="若有病史請詳述..."></textarea>
+      </div>
+    </div>
+  </div>
+</section>
       <!-- 服務資訊 -->
-      <section class="cute-card p-7 md:p-8 space-y-5">
-        <div class="flex items-center gap-3 border-b-2 border-dashed border-hanamu-wood/10 pb-4">
-          <div class="text-2xl">🛁</div>
-          <h3 class="text-lg font-black text-hanamu-dark">本次服務資訊</h3>
-        </div>
+<section class="cute-card p-7 md:p-8 space-y-5" id="secService">
+  <div class="flex items-center gap-3 border-b-2 border-dashed border-hanamu-wood/10 pb-4">
+    <div class="text-2xl">🛁</div>
+    <h3 class="text-lg font-black text-hanamu-dark">本次服務內容</h3>
+  </div>
 
-        <div class="grid md:grid-cols-2 gap-4">
-          <div>
-            <label class="text-sm font-black text-hanamu-wood">預約日期 <span class="text-red-500">*</span></label>
-            <input name="date" required type="date" class="mt-2 w-full cute-input px-4 py-3" />
-          </div>
-          <div>
-            <label class="text-sm font-black text-hanamu-wood">預約時段 <span class="text-red-500">*</span></label>
-            <select name="time" required class="mt-2 w-full cute-input px-4 py-3">
-              <option value="">請選擇</option>
-              <option>10:00</option><option>10:30</option>
-              <option>11:00</option><option>11:30</option>
-              <option>12:00</option><option>12:30</option>
-              <option>13:00</option><option>13:30</option>
-              <option>14:00</option><option>14:30</option>
-              <option>15:00</option><option>15:30</option>
-              <option>16:00</option><option>16:30</option>
-              <option>17:00</option><option>17:30</option>
-              <option>18:00</option>
-            </select>
-          </div>
-          <div class="md:col-span-2">
-            <label class="text-sm font-black text-hanamu-wood">服務內容 <span class="text-red-500">*</span></label>
-            <div class="mt-2 grid sm:grid-cols-2 gap-3">
-              <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" name="service" value="小美容" class="w-4 h-4 accent-hanamu-green" />
-                <span class="font-black text-hanamu-dark">小美容</span>
-                <span class="ml-auto text-[11px] font-bold text-gray-400">洗澡/清耳/剪指甲…</span>
-              </label>
-              <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" name="service" value="大美容" class="w-4 h-4 accent-hanamu-green" />
-                <span class="font-black text-hanamu-dark">大美容</span>
-                <span class="ml-auto text-[11px] font-bold text-gray-400">含全身修剪</span>
-              </label>
-              <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" name="service" value="SPA加購" class="w-4 h-4 accent-hanamu-green" />
-                <span class="font-black text-hanamu-dark">SPA加購</span>
-                <span class="ml-auto text-[11px] font-bold text-gray-400">客製化</span>
-              </label>
-              <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" name="service" value="其他" class="w-4 h-4 accent-hanamu-green" />
-                <span class="font-black text-hanamu-dark">其他</span>
-                <span class="ml-auto text-[11px] font-bold text-gray-400">請備註</span>
-              </label>
-            </div>
+  <!-- 服務項目（單選） -->
+  <div class="grid sm:grid-cols-2 gap-3">
+    <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center gap-3 cursor-pointer">
+      <input type="radio" name="service_type" value="包月洗澡" class="w-4 h-4 accent-hanamu-green" required onchange="toggleOtherServiceInput()"/>
+      <span class="font-black text-hanamu-dark">包月洗澡</span>
+    </label>
 
-            <textarea name="service_note" class="mt-3 w-full cute-input px-4 py-3" rows="3" placeholder="服務備註（例如：只剪指甲／皮膚敏感／不剃肚毛…）"></textarea>
-          </div>
-        </div>
-      </section>
+    <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center gap-3 cursor-pointer">
+      <input type="radio" name="service_type" value="基礎洗澡" class="w-4 h-4 accent-hanamu-green" required onchange="toggleOtherServiceInput()"/>
+      <span class="font-black text-hanamu-dark">基礎洗澡</span>
+    </label>
 
+    <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center gap-3 cursor-pointer">
+      <input type="radio" name="service_type" value="精緻美容" class="w-4 h-4 accent-hanamu-green" required onchange="toggleOtherServiceInput()"/>
+      <span class="font-black text-hanamu-dark">精緻美容</span>
+    </label>
+
+    <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center gap-3 cursor-pointer">
+      <input type="radio" name="service_type" value="局部修剪" class="w-4 h-4 accent-hanamu-green" required onchange="toggleOtherServiceInput()"/>
+      <span class="font-black text-hanamu-dark">局部修剪</span>
+    </label>
+
+    <label class="p-4 rounded-2xl border-2 border-gray-200 bg-white flex items-center gap-3 cursor-pointer sm:col-span-2">
+      <input type="radio" name="service_type" value="其他項目" class="w-4 h-4 accent-hanamu-green" required onchange="toggleOtherServiceInput()"/>
+      <span class="font-black text-hanamu-dark">其他項目</span>
+      <span class="ml-auto text-[11px] font-bold text-gray-400">請填寫說明</span>
+    </label>
+  </div>
+
+  <div id="otherServiceInputArea" class="hidden">
+    <label class="text-sm font-black text-hanamu-wood">其他項目說明</label>
+    <input name="other_service_desc" id="otherServiceDesc" class="mt-2 w-full cute-input px-4 py-3" placeholder="請說明服務內容（例如：剪指甲、清耳朵...）" />
+  </div>
+
+  <!-- 接回時間 -->
+  <div class="pt-2 border-t border-dashed border-hanamu-wood/10">
+    <label class="text-sm font-black text-hanamu-wood">預計接回時間</label>
+
+    <div class="mt-2 flex gap-3 items-stretch">
+      <button type="button" id="btnNotifyLater" onclick="togglePickupTimeMode()"
+              class="px-4 rounded-2xl border-2 border-hanamu-green/30 bg-white font-black text-xs text-hanamu-green hover:bg-hanamu-green hover:text-white transition">
+        另行通知
+      </button>
+
+      <input type="time" name="pickup_time" id="pickupTime" class="w-full cute-input px-4 py-3" />
+      <input type="text" id="pickupTimeText" class="hidden w-full cute-input px-4 py-3 bg-gray-100 text-gray-500 font-black text-center"
+             value="另行通知接回時間" readonly />
+    </div>
+
+    <div class="mt-3 bg-hanamu-green/5 border border-hanamu-green/15 rounded-2xl p-4 text-xs font-bold text-hanamu-dark leading-relaxed">
+      逾時 <span class="text-hanamu-green font-black">2 小時</span> 以上，將酌收
+      <span class="text-hanamu-green font-black">$150/小時</span> 逾時費。
+    </div>
+  </div>
+</section>
       <!-- 條款與簽名 -->
       <section class="cute-card p-7 md:p-8 space-y-5">
         <div class="flex items-center gap-3 border-b-2 border-dashed border-hanamu-wood/10 pb-4">
@@ -427,65 +632,55 @@
 
   <div class="grid md:grid-cols-2 gap-3 text-[13px]">
 
-    <!-- 店家名稱 -->
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">店家名稱</span>
       <span class="font-black">花沐寵物沙龍</span>
     </div>
 
-    <!-- 負責人 -->
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">負責人</span>
-      <span class="font-black">負責人姓名</span>
+      <span class="font-black">（請填負責人姓名）</span>
     </div>
 
-    <!-- 聯絡電話 -->
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">聯絡電話</span>
-      <a class="font-black text-hanamu-dark underline" href="tel:請填電話只留數字">
-        電話
-      </a>
+      <a class="font-black text-hanamu-dark underline" href="tel:請填電話只留數字">（請填電話）</a>
     </div>
 
-    </div>
-
-    <!-- 地址 -->
     <div class="md:col-span-2">
       <span class="text-gray-400 font-bold block text-[11px]">地址</span>
       <span class="font-black">708臺南市安平區文平路65號</span>
     </div>
 
-    <!-- 營業時間 -->
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">營業時間</span>
       <span class="font-black">10:30 – 19:00</span>
     </div>
 
-    <!-- 每週一店休 -->
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">店休日</span>
       <span class="font-black text-hanamu-red">(每週一店休)</span>
     </div>
 
-    <!-- 特約緊急送醫場所 -->
     <div class="md:col-span-2 pt-2 border-t border-dashed border-hanamu-wood/10">
       <span class="text-gray-400 font-bold block text-[11px]">特約緊急送醫場所</span>
 
       <div class="mt-2 bg-white rounded-2xl border border-hanamu-wood/10 p-4 space-y-2">
         <div>
           <span class="text-gray-400 font-bold block text-[11px]">特約醫院名字</span>
-          <span class="font-black">醫院名稱</span>
+          <span class="font-black">（請填醫院名稱）</span>
         </div>
 
         <div>
           <span class="text-gray-400 font-bold block text-[11px]">地址</span>
-          <span class="font-black">醫院地址</span>
+          <span class="font-black">（請填醫院地址）</span>
         </div>
       </div>
     </div>
 
   </div>
 </div>
+
         <button type="button" id="openTermsBtn"
                 class="w-full p-4 rounded-2xl border-2 border-hanamu-green/30 bg-white hover:border-hanamu-green transition flex items-center justify-between">
           <div class="text-left">
@@ -524,12 +719,12 @@
         class="submit-cta w-full py-5 font-black text-lg text-white transition
                disabled:opacity-50 disabled:cursor-not-allowed">
   <span class="relative z-10 flex items-center justify-center gap-3 tracking-wide">
-    <i data-lucide="send" class="w-5 h-5"></i>
-    確認並提交契約
+    <i id="submitIconSend" data-lucide="send" class="w-5 h-5"></i>
+    <i id="submitIconLoading" data-lucide="loader-circle" class="w-5 h-5 hidden animate-spin"></i>
+    <span id="submitLabel">確認並提交契約</span>
   </span>
 </button>
-
-<div id="formMsg" class="hidden p-4 rounded-2xl text-sm font-bold"></div>
+        <div id="formMsg" class="hidden p-4 rounded-2xl text-sm font-bold"></div>
       </section>
     </form>
 
@@ -634,7 +829,7 @@
 
 <!-- ====== 全螢幕簽名 ====== -->
 <div id="sigFullscreen" class="fullscreen-signature">
-  <div class="px-5 py-4 bg-hanamu-wood text-white flex items-center justify-between shadow-sm">
+  <div class="px-5 py-4 bg-hanamu-green text-white flex items-center justify-between shadow-sm">
     <div class="font-black">請簽名</div>
     <button type="button" id="closeSigFsBtn" class="px-3 py-1 rounded-full bg-white/15 font-black">關閉</button>
   </div>
@@ -662,6 +857,173 @@
 
 
 <script>
+    // ===============================
+// ✅ Supabase 設定（花沐專案）
+// ===============================
+const SUPABASE_URL = "https://yribgjhptlmbmtrlfube.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyaWJnamhwdGxtYm10cmxmdWJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTkwNDYsImV4cCI6MjA4OTIzNTA0Nn0.WEnfOjmurYOGYP3Fmp-UYPikyj4dy4DHpyL8_0vf2dQ";
+
+// 你建表用的表名（上面 SQL 的 service_contracts）
+const SB_TABLE = "service_contracts";
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ✅ 小工具：把 form 轉成 object（含 radio）
+function getFormObject(formEl){
+  const fd = new FormData(formEl);
+  const obj = Object.fromEntries(fd.entries());
+  return obj;
+}
+
+// ✅ 讓舊客搜尋用的 phone 乾淨化
+function cleanPhone(p){
+  return (p || "").replace(/[^\d]/g, "");
+}
+
+// ===============================
+// ✅ 舊客搜尋：查 Supabase → 選寵物 → 帶入表單
+// ===============================
+async function searchOldCustomer(){
+  const phoneInput = document.querySelector('input[name="owner_phone"]');
+  const btn = document.getElementById("searchBtn");
+  const phone = cleanPhone(phoneInput?.value);
+
+  if(!phone || phone.length !== 10){
+    showMsg("err", "⚠️ 請輸入 10 碼手機號碼（09xxxxxxxx）再搜尋。");
+    return;
+  }
+
+  const original = btn?.innerHTML;
+  if(btn){
+    btn.disabled = true;
+    btn.innerHTML = `<i data-lucide="loader-circle" class="w-5 h-5 animate-spin"></i><span class="text-[10px] mt-1">搜尋中</span>`;
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  try{
+    const { data, error } = await sb
+      .from(SB_TABLE)
+      .select("id, created_at, owner_phone, pet_name, payload")
+      .eq("owner_phone", phone)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if(error) throw error;
+
+    if(!data || data.length === 0){
+      showMsg("err", `⚠️ 查無 ${phone} 的舊客紀錄。`);
+      return;
+    }
+
+    // 依 pet_name 去重（保留最新）
+    const byPet = {};
+    data.forEach(r => { if(!byPet[r.pet_name]) byPet[r.pet_name] = r; });
+
+    openPetSelectModal(Object.values(byPet));
+  }catch(err){
+    console.error(err);
+    showMsg("err", "⚠️ 舊客搜尋失敗，請稍後再試。");
+  }finally{
+    if(btn){
+      btn.disabled = false;
+      btn.innerHTML = original;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+}
+
+function openPetSelectModal(records){
+  const modal = document.getElementById("petSelectModal");
+  const box = document.getElementById("petListContainer");
+  if(!modal || !box) return;
+
+  box.innerHTML = "";
+
+  records.forEach(r => {
+    const d = new Date(r.created_at);
+    const dateStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,"0")}/${String(d.getDate()).padStart(2,"0")}`;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "w-full text-left p-4 rounded-2xl border-2 border-gray-200 hover:border-hanamu-green/40 hover:bg-hanamu-green/5 transition";
+    btn.innerHTML = `
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <div class="font-black text-hanamu-dark">${r.pet_name || "（未填寵物名）"}</div>
+          <div class="text-[11px] font-bold text-gray-500 mt-1">上次填寫：${dateStr}</div>
+        </div>
+        <div class="text-xs font-black text-hanamu-green">帶入</div>
+      </div>
+    `;
+    btn.addEventListener("click", () => {
+      fillFormWithPayload(r.payload || {});
+      closePetSelectModal();
+      showMsg("ok", `✅ 已帶入「${r.pet_name}」的舊客資料`);
+    });
+    box.appendChild(btn);
+  });
+
+  modal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closePetSelectModal(keepEditing=false){
+  const modal = document.getElementById("petSelectModal");
+  if(modal) modal.classList.add("hidden");
+  document.body.style.overflow = "";
+  if(keepEditing) showMsg("ok", "✅ 已取消帶入，可繼續填寫新表單");
+}
+
+// 把 payload 帶回表單（依 name 對應）
+function fillFormWithPayload(p){
+  const form = document.getElementById("contractForm");
+  if(!form) return;
+
+  // 1) 一般 input/select/textarea
+  Object.entries(p).forEach(([k,v]) => {
+    const el = form.querySelector(`[name="${CSS.escape(k)}"]`);
+    if(!el) return;
+
+    if(el.type === "radio"){
+      // radio 另外處理
+      return;
+    }
+    el.value = v ?? "";
+  });
+
+  // 2) radio groups（逐組用 value 勾起來）
+  const radioNames = ["pet_sex","is_neutered","is_friendly","is_dog_friendly","is_aggressive","has_history","service_type"];
+  radioNames.forEach(name=>{
+    const val = p[name];
+    if(!val) return;
+    const r = form.querySelector(`input[type="radio"][name="${name}"][value="${CSS.escape(val)}"]`);
+    if(r) r.checked = true;
+  });
+
+  // 3) 晶片狀態切換（你已經有 toggleChipInput）
+  if(p.chip_status){
+    const sel = document.getElementById("chipStatus");
+    if(sel) sel.value = p.chip_status;
+    if(typeof toggleChipInput === "function") toggleChipInput();
+  }
+
+  // 4) 其他項目顯示
+  if(typeof toggleOtherServiceInput === "function") toggleOtherServiceInput();
+
+  // 5) 接回時間（另行通知模式）
+  const pickup = p.pickup_time;
+  if(pickup === "另行通知接回時間"){
+    if(typeof isNotifyLater !== "undefined" && !isNotifyLater && typeof togglePickupTimeMode === "function"){
+      togglePickupTimeMode();
+    }
+  }else if(pickup){
+    if(typeof isNotifyLater !== "undefined" && isNotifyLater && typeof togglePickupTimeMode === "function"){
+      togglePickupTimeMode();
+    }
+    const timeEl = document.getElementById("pickupTime");
+    if(timeEl) timeEl.value = pickup;
+  }
+}
   // ====== 簡易路由：#home / #grooming ======
   const viewHome = document.getElementById("view-home");
   const viewGrooming = document.getElementById("view-grooming");
@@ -724,7 +1086,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const nearBottom = (termsBody.scrollHeight - termsBody.scrollTop - termsBody.clientHeight) < 40;
     if(nearBottom){
       agreeTermsBtn.disabled = false;
-      agreeTermsBtn.className = "w-full py-4 rounded-xl font-black transition bg-hanamu-wood text-white shadow-lg shadow-hanamu-wood/20";
+      agreeTermsBtn.className = "w-full py-4 rounded-xl font-black transition bg-hanamu-green text-white shadow-lg shadow-hanamu-green/20";
       agreeTermsBtn.textContent = "我已詳閱並同意";
       termsHint.style.display = "none";
     }
@@ -737,7 +1099,76 @@ window.addEventListener("DOMContentLoaded", () => {
     closeTerms();
     refreshSigLock();
   });
+// ✅ 只留數字（手機/電話/晶片）
+function digitsOnly(input){
+  input.value = (input.value || "").replace(/[^\d]/g, "");
+}
 
+// ✅ 晶片狀態切換（無晶片/不詳 → 禁用輸入）
+function toggleChipInput(){
+  const sel = document.getElementById("chipStatus");
+  const input = document.getElementById("petChip");
+  if(!sel || !input) return;
+
+  const v = sel.value;
+  if(v === "no_chip"){
+    input.value = "";
+    input.disabled = true;
+    input.placeholder = "無晶片免填";
+    input.classList.add("opacity-50");
+  }else if(v === "unknown"){
+    input.value = "";
+    input.disabled = true;
+    input.placeholder = "號碼不詳";
+    input.classList.add("opacity-50");
+  }else{
+    input.disabled = false;
+    input.placeholder = "請輸入10或15碼數字";
+    input.classList.remove("opacity-50");
+  }
+}
+toggleChipInput();
+
+// ✅ 服務選到「其他項目」才顯示說明欄
+function toggleOtherServiceInput(){
+  const isOther = document.querySelector('input[name="service_type"][value="其他項目"]')?.checked;
+  const area = document.getElementById("otherServiceInputArea");
+  const desc = document.getElementById("otherServiceDesc");
+  if(!area) return;
+
+  if(isOther){
+    area.classList.remove("hidden");
+    setTimeout(()=> desc?.focus(), 50);
+  }else{
+    area.classList.add("hidden");
+    if(desc) desc.value = "";
+  }
+}
+
+// ✅ 接回時間：另行通知模式切換
+let isNotifyLater = false;
+function togglePickupTimeMode(){
+  isNotifyLater = !isNotifyLater;
+
+  const timeInput = document.getElementById("pickupTime");
+  const textInput = document.getElementById("pickupTimeText");
+  const btn = document.getElementById("btnNotifyLater");
+
+  if(!timeInput || !textInput || !btn) return;
+
+  if(isNotifyLater){
+    timeInput.classList.add("hidden");
+    textInput.classList.remove("hidden");
+    timeInput.value = "";
+    btn.classList.add("bg-hanamu-green","text-white");
+    btn.classList.remove("bg-white","text-hanamu-green");
+  }else{
+    timeInput.classList.remove("hidden");
+    textInput.classList.add("hidden");
+    btn.classList.remove("bg-hanamu-green","text-white");
+    btn.classList.add("bg-white","text-hanamu-green");
+  }
+}
   // ====== 簽名（需先同意條款才解鎖） ======
   const openSigBtn = document.getElementById("openSigBtn");
   const clearSigBtn = document.getElementById("clearSigBtn");
@@ -855,15 +1286,22 @@ clearSigBtn.addEventListener("click", () => {
     formMsg.scrollIntoView({ behavior:"smooth", block:"center" });
   }
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     // 檢查 checkbox 至少一項
-    const services = [...form.querySelectorAll('input[name="service"]:checked')].map(x => x.value);
-    if(services.length === 0){
-      showMsg("err", "⚠️ 請至少選擇一項服務內容。");
-      return;
-    }
+const serviceType = form.querySelector('input[name="service_type"]:checked')?.value || "";
+if(!serviceType){
+  showMsg("err", "⚠️ 請選擇本次服務內容。");
+  return;
+}
+if(serviceType === "其他項目"){
+  const otherDesc = document.getElementById("otherServiceDesc")?.value?.trim() || "";
+  if(!otherDesc){
+    showMsg("err", "⚠️ 請填寫「其他項目」的服務說明。");
+    return;
+  }
+}
 
     // 檢查條款
     if(!termsAgreed){
@@ -877,17 +1315,77 @@ clearSigBtn.addEventListener("click", () => {
       return;
     }
 
-    // 送出成功（此版本不含後端，先做前端成功頁感）
-    submitBtn.disabled = true;
-    submitBtn.textContent = "提交中…";
+// ✅ 真的寫入 Supabase
+const submitLabel = document.getElementById("submitLabel");
+const submitIconSend = document.getElementById("submitIconSend");
+const submitIconLoading = document.getElementById("submitIconLoading");
 
-    setTimeout(() => {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "確認並提交契約";
-      showMsg("ok", "✅ 已完成提交！（此為純前端示範版，若要像宿洗一樣存檔/寄信，後續可接後端）");
-    }, 800);
+submitBtn.disabled = true;
+if (submitLabel) submitLabel.textContent = "提交中…";
+submitIconSend?.classList.add("hidden");
+submitIconLoading?.classList.remove("hidden");
+
+try{
+  // 收集表單資料
+  const payload = getFormObject(form);
+
+  // 補上「另行通知」的接回時間文字（不然會是空字串）
+  payload.pickup_time = (typeof isNotifyLater !== "undefined" && isNotifyLater)
+    ? "另行通知接回時間"
+    : (document.getElementById("pickupTime")?.value || "");
+
+  // 服務=其他項目時，把說明也存進 payload
+  if(payload.service_type === "其他項目"){
+    payload.other_service_desc = document.getElementById("otherServiceDesc")?.value?.trim() || "";
+  }
+
+  // 簽名（先存 base64；之後你要我再改成 Storage URL）
+  payload.signature_data = sigDataURL;
+  payload.signed_at = new Date().toISOString();
+  payload.terms_agreed = true;
+
+  const ownerPhone = cleanPhone(payload.owner_phone);
+  const petName = payload.pet_name || "未填";
+
+  const { error } = await sb.from(SB_TABLE).insert([{
+    owner_phone: ownerPhone,
+    pet_name: petName,
+    payload
+  }]);
+
+  if(error) throw error;
+
+  showMsg("ok", "✅ 已提交並寫入資料庫（Supabase）");
+}catch(err){
+  console.error(err);
+  showMsg("err", "⚠️ 提交失敗（Supabase 寫入錯誤），請稍後再試。");
+}finally{
+  submitBtn.disabled = false;
+  if (submitLabel) submitLabel.textContent = "確認並提交契約";
+  submitIconSend?.classList.remove("hidden");
+  submitIconLoading?.classList.add("hidden");
+}
   });
 </script>
+<!-- ✅ 舊客搜尋：寵物選擇彈窗 -->
+<div id="petSelectModal" class="fixed inset-0 z-[9999] hidden bg-black/30 flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white rounded-3xl border border-hanamu-green/10 shadow-2xl overflow-hidden">
+    <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+      <div class="font-black text-hanamu-dark">搜尋到舊客紀錄</div>
+      <button type="button" onclick="closePetSelectModal()"
+              class="px-3 py-1 rounded-full bg-gray-100 text-gray-600 font-black">關閉</button>
+    </div>
 
+    <div class="p-5">
+      <div class="text-xs font-bold text-gray-500 mb-3">請選擇要帶入的毛孩資料：</div>
+      <div id="petListContainer" class="space-y-3 max-h-[55vh] overflow-auto pr-1"></div>
+
+      <button type="button" onclick="closePetSelectModal(true)"
+              class="mt-4 w-full py-3 rounded-2xl border-2 border-gray-200 font-black text-gray-600 hover:bg-gray-50 transition">
+        不使用舊資料，繼續填寫
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
