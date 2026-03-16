@@ -1903,7 +1903,7 @@ clearSigBtn.addEventListener("click", () => {
 
 let __toastTimer = null;
 
-function showMsg(type, text){
+function showMsg(type, text, subText){
   const toast = document.getElementById("toast");
   const toastCard = document.getElementById("toastCard");
   const toastText = document.getElementById("toastText");
@@ -1911,15 +1911,22 @@ function showMsg(type, text){
 
   if(!toast || !toastCard || !toastText || !toastSub) return;
 
+  const defaultOkSub = "提示：請繼續完成本次服務內容、條款閱讀與簽名";
+  const defaultErrSub = "請檢查欄位後再試一次";
+
   toast.style.display = "block";
   toastCard.classList.remove("toast-ok","toast-err","toast-anim");
   toastCard.classList.add(type === "ok" ? "toast-ok" : "toast-err");
   toastCard.classList.add("toast-anim");
 
   toastText.textContent = text || "";
-  toastSub.textContent = (type === "ok")
-    ? "提示：請繼續完成本次服務內容、條款閱讀與簽名"
-    : "請檢查欄位後再試一次";
+
+  // ✅ 第三參數有傳就用；沒傳就沿用原本預設文案
+  if(typeof subText === "string" && subText.trim()){
+    toastSub.textContent = subText.trim();
+  }else{
+    toastSub.textContent = (type === "ok") ? defaultOkSub : defaultErrSub;
+  }
 
   if(__toastTimer) clearTimeout(__toastTimer);
   __toastTimer = setTimeout(()=>{ toast.style.display = "none"; }, 2200);
@@ -2543,10 +2550,10 @@ location.hash = "#success";
     return !inGrooming;
   }
 
-  function toast(type, text) {
+  function toast(type, text, subText) {
     // 你有 showMsg 就用它；沒有也不會報錯
     try {
-      if (typeof showMsg === "function") showMsg(type, text);
+      if (typeof showMsg === "function") showMsg(type, text, subText);
     } catch (e) {}
   }
 
@@ -2567,7 +2574,11 @@ location.hash = "#success";
         if (canAutoReloadNow()) {
           reg.waiting.postMessage({ type: "SKIP_WAITING" });
         } else {
-          toast("ok", "✅ 偵測到新版本，建議將網頁重新整理進行更新");
+          toast(
+  "ok",
+  "✅ 偵測到新版本",
+  "更新提醒：建議完成目前操作後，將此頁重新整理以套用最新版本"
+);
         }
       }
 
@@ -2583,7 +2594,11 @@ location.hash = "#success";
               if (canAutoReloadNow()) {
                 reg.waiting.postMessage({ type: "SKIP_WAITING" });
               } else {
-                toast("ok", "✅ 偵測到新版本，建議將網頁重新整理進行更新");
+                toast(
+  "ok",
+  "✅ 偵測到新版本",
+  "更新提醒：建議完成目前操作後，將此頁重新整理以套用最新版本"
+);
               }
             }
           }
