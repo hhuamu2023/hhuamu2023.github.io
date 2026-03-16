@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="format-detection" content="telephone=no" />
+  <link rel="icon" href="https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png">
   <title>花沐寵物沙龍｜數位美容契約</title>
 
   <!-- Tailwind (快速做出宿洗感的卡片與排版) -->
@@ -98,33 +99,65 @@ body{
       z-index:-1;
     }
     .modal-backdrop{
-      position:fixed; inset:0;
-      background: rgba(47,47,47,.45);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      z-index: 60;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 1rem;
-    }
+  position: fixed;
+  inset: 0;
+  background: rgba(47,47,47,.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 60;
+  display: none;
+
+  /* ✅ 手機：全螢幕條款更自然，不會卡在中間 */
+  align-items: stretch;
+  justify-content: center;
+  padding: 0;
+
+  /* ✅ 避免 iOS 背景橡皮筋 */
+  overscroll-behavior: contain;
+}
     .modal{
-      width:100%;
-      max-width: 36rem;
-      max-height: 85vh;
-      overflow:hidden;
-      border-radius: 1.75rem;
-      background:white;
-      box-shadow: 0 12px 38px rgba(196, 140, 147, .16);
-      border: 1px solid rgba(0,0,0,.05);
-      display:flex;
-      flex-direction: column;
-    }
+  width: 100%;
+  background: white;
+  box-shadow: 0 12px 38px rgba(196, 140, 147, .16);
+  border: 1px solid rgba(0,0,0,.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* ✅ 手機：直接滿版高度（含動態視窗） */
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+}
+
+/* ✅ 桌機：回到置中卡片 */
+@media (min-width: 768px){
+  .modal-backdrop{
+    align-items: center;
+    padding: 1rem;
+  }
+  .modal{
+    height: auto;
+    max-height: 85vh;
+    max-width: 36rem;
+    border-radius: 1.75rem;
+  }
+}
     .modal-body{
-      overflow:auto;
-background: var(--bg);
-      padding: 1.25rem;
-    }
+  /* ✅ 讓內容區可捲，且不會把底部按鈕擠出畫面 */
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+
+  background: var(--bg);
+  padding: 1.25rem;
+
+  /* ✅ iOS 捲動手感 */
+  -webkit-overflow-scrolling: touch;
+
+  /* ✅ 避免內層捲動時把整頁帶動 */
+  overscroll-behavior: contain;
+}
     .fullscreen-signature{
       position:fixed; inset:0;
       z-index: 80;
@@ -196,6 +229,102 @@ background: var(--bg);
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+}
+/* ✅ 全螢幕簽名：修正桌機看不到底部按鈕 + 手機 safe-area */
+.fullscreen-signature{
+  height: 100dvh; /* 比 100vh 更適合手機瀏覽器 */
+}
+
+/* 上方列固定 */
+.sig-fs-top{
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-top: max(0px, env(safe-area-inset-top));
+}
+
+/* 中間可縮：關鍵是 min-height:0，不然會把底部擠掉 */
+.sig-fs-body{
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: .75rem;
+}
+
+.sig-fs-canvasWrap{
+  flex: 1;
+  min-height: 0;
+  background: #fff;
+  border-radius: 1rem;
+  border: 2px solid rgba(155,122,94,.20);
+  overflow: hidden;
+}
+
+/* 底部按鈕固定在底部 + safe-area */
+.sig-fs-actions{
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0,0,0,.06);
+  padding: .75rem;
+  padding-bottom: max(.75rem, env(safe-area-inset-bottom));
+}
+/* ✅ Success：固定副本 header + 浮雕副本卡 + 章印 */
+.success-topbar{
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255,255,255,.86);
+  border-bottom: 1px solid rgba(196,140,147,.16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.receipt-emboss{
+  background: rgba(255,255,255,.82);
+  border: 1px solid rgba(196,140,147,.18);
+  box-shadow:
+    0 22px 60px rgba(196,140,147,.12),
+    inset 0 1px 0 rgba(255,255,255,.70),
+    inset 0 -10px 30px rgba(196,140,147,.06);
+  border-radius: 1.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.receipt-stamp{
+  position:absolute;
+  top: 18px;
+  right: 18px;
+  transform: rotate(10deg);
+  border: 2px solid rgba(196,140,147,.55);
+  color: rgba(185,116,130,.95);
+  background: rgba(255,255,255,.70);
+  padding: 8px 10px;
+  border-radius: 14px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  font-size: 11px;
+  text-transform: uppercase;
+  box-shadow: 0 10px 24px rgba(196,140,147,.18);
+}
+
+.receipt-divider{
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(196,140,147,.28), transparent);
+}
+
+.print-hide{ display:block; }
+@media print{
+  header, .success-topbar, .bg-blob, #info, footer, #btnBackHome { display:none !important; }
+  main{ max-width: 900px !important; }
+  .print-hide{ display:none !important; }
+  body{ background: #fff !important; }
+  .receipt-emboss{ box-shadow:none !important; border: 1px solid #ddd !important; }
 }
   </style>
 </head>
@@ -733,6 +862,111 @@ background: var(--bg);
     </div>
   </section>
 
+<!-- ✅ 成功頁（view-success）：契約副本（可截圖） -->
+<section id="view-success" class="hidden">
+  <!-- ✅ 固定頂部：副本 header（像宿洗） -->
+  <div class="success-topbar">
+    <div class="max-w-3xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
+      <a href="#home" class="print-hide flex items-center gap-2 text-xs font-black text-hanamu-wood hover:bg-hanamu-wood/10 px-4 py-2 rounded-full transition-colors">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> 返回首頁
+      </a>
+
+      <div class="text-center">
+        <div class="text-[11px] font-black text-gray-400 tracking-widest uppercase">Contract Copy</div>
+        <div class="text-sm font-black text-hanamu-dark">契約副本（可截圖保存）</div>
+      </div>
+
+      <button type="button" onclick="window.print()"
+              class="print-hide flex items-center gap-2 text-xs font-black bg-hanamu-green text-white px-4 py-2 rounded-full shadow-lg shadow-hanamu-green/20 active:scale-[0.99] transition">
+        <i data-lucide="printer" class="w-4 h-4"></i> 列印/PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-3xl mx-auto px-5 pb-24 pt-6">
+    <!-- ✅ 副本卡 -->
+    <div id="receiptCard" class="receipt-emboss p-6 md:p-8">
+      <div class="receipt-stamp">已簽署</div>
+
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="text-base font-black text-hanamu-dark">花沐寵物沙龍｜美容數位契約</div>
+          <div class="mt-1 text-[11px] font-bold text-gray-500">
+            合約編號：<span id="rc_id">—</span>
+            <span class="mx-2">｜</span>
+            簽署時間：<span id="rc_time">—</span>
+          </div>
+        </div>
+
+        <div class="shrink-0 w-11 h-11 rounded-full bg-hanamu-green text-white flex items-center justify-center shadow-lg shadow-hanamu-green/20">
+          <i data-lucide="file-check" class="w-5 h-5"></i>
+        </div>
+      </div>
+
+      <div class="mt-5 receipt-divider"></div>
+
+      <!-- 摘要（方便截圖） -->
+      <div class="mt-5 grid gap-4 text-[13px]">
+        <div class="grid md:grid-cols-2 gap-2">
+          <div><span class="text-gray-400 font-bold">飼主姓名：</span><span id="rc_owner_name" class="font-black">—</span></div>
+          <div><span class="text-gray-400 font-bold">聯絡手機：</span><span id="rc_owner_phone" class="font-black">—</span></div>
+          <div class="md:col-span-2"><span class="text-gray-400 font-bold">Email：</span><span id="rc_owner_email" class="font-black">—</span></div>
+          <div class="md:col-span-2"><span class="text-gray-400 font-bold">通訊地址：</span><span id="rc_owner_address" class="font-black">—</span></div>
+        </div>
+
+        <div class="receipt-divider"></div>
+
+        <div class="grid md:grid-cols-2 gap-2">
+          <div><span class="text-gray-400 font-bold">毛孩名字：</span><span id="rc_pet_name" class="font-black">—</span></div>
+          <div><span class="text-gray-400 font-bold">年齡：</span><span id="rc_pet_age" class="font-black">—</span> 歲</div>
+          <div><span class="text-gray-400 font-bold">品種：</span><span id="rc_pet_breed" class="font-black">—</span></div>
+          <div><span class="text-gray-400 font-bold">花色：</span><span id="rc_pet_color" class="font-black">—</span></div>
+          <div><span class="text-gray-400 font-bold">性別：</span><span id="rc_pet_sex" class="font-black">—</span></div>
+          <div><span class="text-gray-400 font-bold">結紮：</span><span id="rc_is_neutered" class="font-black">—</span></div>
+          <div class="md:col-span-2"><span class="text-gray-400 font-bold">晶片：</span><span id="rc_pet_chip" class="font-black">—</span></div>
+        </div>
+
+        <div class="receipt-divider"></div>
+
+        <div class="grid md:grid-cols-2 gap-2">
+          <div><span class="text-gray-400 font-bold">服務項目：</span><span id="rc_service_type" class="font-black">—</span></div>
+          <div><span class="text-gray-400 font-bold">接回時間：</span><span id="rc_pickup_time" class="font-black">—</span></div>
+        </div>
+
+        <div class="bg-hanamu-green/5 border border-hanamu-green/15 rounded-2xl p-4 text-xs font-bold text-hanamu-dark leading-relaxed">
+          逾時 <span class="text-hanamu-green font-black">2 小時</span> 以上，將酌收
+          <span class="text-hanamu-green font-black">$150/小時</span> 逾時費。
+        </div>
+
+        <div class="receipt-divider"></div>
+
+        <!-- ✅ 條款全文（直接複製自 modal 內容） -->
+        <div>
+          <div class="font-black text-hanamu-wood mb-2">契約條款全文</div>
+          <div id="rc_terms" class="bg-white/80 rounded-2xl border border-hanamu-wood/10 p-4 leading-relaxed text-[13px] text-gray-700 whitespace-pre-wrap"></div>
+        </div>
+
+        <!-- ✅ 簽名與簽署時間 -->
+        <div class="bg-white rounded-2xl border-2 border-hanamu-wood/20 p-4">
+          <div class="font-black text-hanamu-wood mb-2">數位簽名</div>
+          <div class="flex justify-center">
+            <img id="rc_signature" alt="signature" class="max-h-28 object-contain" />
+          </div>
+          <div class="text-[11px] font-bold text-gray-500 text-right mt-2">
+            簽署時間：<span id="rc_signed_at"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="print-hide mt-6 grid gap-3">
+      <a href="#grooming" class="w-full py-4 rounded-2xl border-2 border-hanamu-green/30 bg-white font-black text-hanamu-green active:scale-[0.99] transition text-center">
+        再填一份新的契約
+      </a>
+    </div>
+  </div>
+</section>
+
 </main>
 
 
@@ -827,23 +1061,25 @@ background: var(--bg);
 </div>
 
 
-<!-- ====== 全螢幕簽名 ====== -->
+<!-- ====== 全螢幕簽名（修正版：底部按鈕永遠可見 + 右上角 X） ====== -->
 <div id="sigFullscreen" class="fullscreen-signature">
-  <div class="px-5 py-4 bg-hanamu-green text-white flex items-center justify-between shadow-sm">
+  <div class="sig-fs-top px-5 py-4 bg-hanamu-green text-white flex items-center justify-between shadow-sm">
     <div class="font-black">請簽名</div>
-    <button type="button" id="closeSigFsBtn" class="px-3 py-1 rounded-full bg-white/15 font-black">關閉</button>
+
+    <!-- 右上角 X -->
+    <button type="button" id="closeSigFsBtn"
+            class="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 transition flex items-center justify-center">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
   </div>
 
-  <div class="flex-1 p-3">
-    <div class="h-full bg-white rounded-2xl border-2 border-hanamu-wood/20 overflow-hidden">
+  <div class="sig-fs-body">
+    <div class="sig-fs-canvasWrap">
       <canvas id="sigCanvas" class="w-full h-full"></canvas>
     </div>
-    <div class="mt-2 text-[11px] font-bold text-gray-500">
-      提示：請用手指簽名（可重寫）
-    </div>
   </div>
 
-  <div class="p-4 bg-white border-t flex gap-3">
+  <div class="sig-fs-actions flex gap-3">
     <button type="button" id="sigClearFsBtn"
             class="flex-1 py-3 rounded-xl font-black bg-gray-100 text-gray-600">
       重寫
@@ -854,7 +1090,6 @@ background: var(--bg);
     </button>
   </div>
 </div>
-
 
 <script>
     // ===============================
@@ -867,7 +1102,41 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const SB_TABLE = "service_contracts";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SB_BUCKET = "signatures";
 
+function dataURLtoBlob(dataURL){
+  const arr = dataURL.split(",");
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while(n--) u8arr[n] = bstr.charCodeAt(n);
+  return new Blob([u8arr], { type: mime });
+}
+
+function uid(){
+  // 產生短亂數檔名
+  return (crypto?.randomUUID?.() || `${Date.now()}_${Math.random().toString(36).slice(2,10)}`);
+}
+
+async function uploadSignatureToStorage(dataURL, ownerPhone){
+  if(!dataURL) throw new Error("no_signature");
+  const clean = (ownerPhone || "unknown").replace(/[^\d]/g,"");
+  const blob = dataURLtoBlob(dataURL);
+
+  // 路徑：signatures/09xxxxxxxx/uuid.png（方便管理）
+  const path = `${clean || "unknown"}/${uid()}.png`;
+
+  const { error: upErr } = await sb
+    .storage
+    .from(SB_BUCKET)
+    .upload(path, blob, { contentType: "image/png", upsert: false });
+
+  if(upErr) throw upErr;
+
+  const { data } = sb.storage.from(SB_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
 // ✅ 小工具：把 form 轉成 object（含 radio）
 function getFormObject(formEl){
   const fd = new FormData(formEl);
@@ -1024,31 +1293,94 @@ function fillFormWithPayload(p){
     if(timeEl) timeEl.value = pickup;
   }
 }
-  // ====== 簡易路由：#home / #grooming ======
-  const viewHome = document.getElementById("view-home");
-  const viewGrooming = document.getElementById("view-grooming");
-  const yearEl = document.getElementById("year");
-  yearEl.textContent = new Date().getFullYear();
+// ====== 簡易路由：#home / #grooming / #success ======
+const viewHome = document.getElementById("view-home");
+const viewGrooming = document.getElementById("view-grooming");
+const viewSuccess = document.getElementById("view-success");
+const yearEl = document.getElementById("year");
+if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+function renderSuccessReceipt(){
+  const raw = sessionStorage.getItem("hanamu_last_contract");
+  if(!raw) return;
+
+  let obj;
+  try { obj = JSON.parse(raw); } catch(e){ return; }
+  const p = obj.payload || {};
+
+  const set = (id, v) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = (v === undefined || v === null || v === "") ? "—" : String(v);
+  };
+
+  set("rc_id", obj.id || "—");
+  set("rc_time", (obj.created_at || p.signed_at || "").replace("T"," ").replace("Z",""));
+
+  set("rc_owner_name", p.owner_name);
+  set("rc_owner_phone", p.owner_phone);
+  set("rc_owner_email", p.owner_email);
+  set("rc_owner_address", p.owner_address);
+
+  set("rc_pet_name", p.pet_name);
+  set("rc_pet_age", p.pet_age);
+  set("rc_pet_breed", p.pet_breed);
+  set("rc_pet_color", p.pet_color);
+  set("rc_pet_sex", p.pet_sex);
+  set("rc_is_neutered", p.is_neutered);
+
+  // 晶片顯示（含狀態）
+  const chip = p.chip_status === "no_chip" ? "無晶片"
+            : p.chip_status === "unknown" ? "有晶片（號碼不詳）"
+            : (p.pet_chip ? `有晶片（${p.pet_chip}）` : "—");
+  set("rc_pet_chip", chip);
+
+  // 服務內容 + 其他項目
+  let service = p.service_type || "—";
+  if(service === "其他項目" && p.other_service_desc) service = `其他項目（${p.other_service_desc}）`;
+  set("rc_service_type", service);
+
+  set("rc_pickup_time", p.pickup_time || "—");
+
+  // 簽署時間（副本卡底部）
+  const signedAt = (p.signed_at || obj.created_at || "").replace("T"," ").replace("Z","");
+  set("rc_signed_at", signedAt || "—");
+
+  // 條款全文：從 modal 內容抓文字
+  const termsEl = document.getElementById("termsBody");
+  const rcTerms = document.getElementById("rc_terms");
+  if(termsEl && rcTerms){
+    rcTerms.textContent = (termsEl.innerText || "").trim();
+  }
+
+  // 簽名圖片（Storage URL）
+  const img = document.getElementById("rc_signature");
+  if(img) img.src = p.signature_url || "";
+}
 
 function renderRoute(){
   const hash = location.hash || "#home";
   const inGrooming = hash.includes("grooming");
+  const inSuccess = hash.includes("success");
 
-  viewHome.classList.toggle("hidden", inGrooming);
-  viewGrooming.classList.toggle("hidden", !inGrooming);
+  if (viewHome) viewHome.classList.toggle("hidden", inGrooming || inSuccess);
+  if (viewGrooming) viewGrooming.classList.toggle("hidden", !inGrooming);
+  if (viewSuccess) viewSuccess.classList.toggle("hidden", !inSuccess);
 
   const btnBackHome = document.getElementById("btnBackHome");
   if (btnBackHome) {
-    btnBackHome.classList.toggle("hidden", !inGrooming);
-    btnBackHome.classList.toggle("flex", inGrooming);
+    btnBackHome.classList.toggle("hidden", !inGrooming && !inSuccess);
+    btnBackHome.classList.toggle("flex", inGrooming || inSuccess);
   }
 
-  if (window.lucide) window.lucide.createIcons();
+  if (inSuccess) renderSuccessReceipt();
 
+  if (window.lucide) window.lucide.createIcons();
   window.scrollTo({ top: 0, behavior: "instant" });
 }
-  window.addEventListener("hashchange", renderRoute);
-  renderRoute();
+
+window.addEventListener("hashchange", renderRoute);
+renderRoute();
 // 初始化首頁 Lucide icons
 window.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) window.lucide.createIcons();
@@ -1065,18 +1397,25 @@ window.addEventListener("DOMContentLoaded", () => {
   let termsAgreed = false;
 
   function openTerms(){
-    termsBackdrop.style.display = "flex";
-    agreeTermsBtn.disabled = true;
-    agreeTermsBtn.className = "w-full py-4 rounded-xl font-black transition bg-gray-100 text-gray-400 disabled:cursor-not-allowed";
-    agreeTermsBtn.textContent = "請閱讀完畢";
-    termsHint.style.display = "block";
-    termsBody.scrollTop = 0;
-    document.body.style.overflow = "hidden";
-  }
-  function closeTerms(){
-    termsBackdrop.style.display = "none";
-    document.body.style.overflow = "";
-  }
+  termsBackdrop.style.display = "flex";
+
+  agreeTermsBtn.disabled = true;
+  agreeTermsBtn.className = "w-full py-4 rounded-xl font-black transition bg-gray-100 text-gray-400 disabled:cursor-not-allowed";
+  agreeTermsBtn.textContent = "請閱讀完畢";
+
+  if (termsHint) termsHint.style.display = "block";
+  if (termsBody) termsBody.scrollTop = 0;
+
+  // ✅ 用你已經寫好的鎖頁方式（最穩）
+  lockPageScroll();
+}
+
+function closeTerms(){
+  termsBackdrop.style.display = "none";
+
+  // ✅ 解除鎖頁
+  unlockPageScroll();
+}
 
   openTermsBtn.addEventListener("click", openTerms);
   closeTermsBtn.addEventListener("click", closeTerms);
@@ -1169,6 +1508,24 @@ function togglePickupTimeMode(){
     btn.classList.add("bg-white","text-hanamu-green");
   }
 }
+let __scrollY = 0;
+function lockPageScroll(){
+  __scrollY = window.scrollY || 0;
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${__scrollY}px`;
+  document.body.style.left = "0";
+  document.body.style.right = "0";
+  document.body.style.width = "100%";
+}
+
+function unlockPageScroll(){
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.width = "";
+  window.scrollTo(0, __scrollY);
+}
   // ====== 簽名（需先同意條款才解鎖） ======
   const openSigBtn = document.getElementById("openSigBtn");
   const clearSigBtn = document.getElementById("clearSigBtn");
@@ -1210,7 +1567,7 @@ function togglePickupTimeMode(){
       return;
     }
     sigFullscreen.style.display = "flex";
-
+if (window.lucide) window.lucide.createIcons();
     // 初始化/重設 canvas size
     setTimeout(() => {
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
@@ -1229,12 +1586,12 @@ function togglePickupTimeMode(){
       // 若已有簽名，可選擇要不要載回（這裡先不載回，避免模糊）
     }, 60);
 
-    document.body.style.overflow = "hidden";
+    lockPageScroll();
   }
-  function closeSigFullscreen(){
-    sigFullscreen.style.display = "none";
-    document.body.style.overflow = "";
-  }
+function closeSigFullscreen(){
+  sigFullscreen.style.display = "none";
+  unlockPageScroll();
+}
 
   openSigBtn.addEventListener("click", openSigFullscreen);
   closeSigFsBtn.addEventListener("click", closeSigFullscreen);
@@ -1339,26 +1696,41 @@ try{
     payload.other_service_desc = document.getElementById("otherServiceDesc")?.value?.trim() || "";
   }
 
-  // 簽名（先存 base64；之後你要我再改成 Storage URL）
-  payload.signature_data = sigDataURL;
-  payload.signed_at = new Date().toISOString();
-  payload.terms_agreed = true;
+// ✅ 簽名：上傳到 Supabase Storage，DB 存 URL
+const ownerPhone = cleanPhone(payload.owner_phone);
+const signatureUrl = await uploadSignatureToStorage(sigDataURL, ownerPhone);
 
-  const ownerPhone = cleanPhone(payload.owner_phone);
-  const petName = payload.pet_name || "未填";
+payload.signature_url = signatureUrl;   // ✅ 存 URL
+payload.signed_at = new Date().toISOString();
+payload.terms_agreed = true;
 
-  const { error } = await sb.from(SB_TABLE).insert([{
+// ✅ 寫入資料庫（service_contracts）
+const petName = payload.pet_name || "未填";
+
+const { data: inserted, error: insertErr } = await sb
+  .from(SB_TABLE)
+  .insert([{
     owner_phone: ownerPhone,
     pet_name: petName,
     payload
-  }]);
+  }])
+  .select("id, created_at")
+  .single();
 
-  if(error) throw error;
+if (insertErr) throw insertErr;
 
-  showMsg("ok", "✅ 已提交並寫入資料庫（Supabase）");
+// ✅ 給 success 用：存到 sessionStorage（方便顯示「契約副本」）
+sessionStorage.setItem("hanamu_last_contract", JSON.stringify({
+  id: inserted?.id || "",
+  created_at: inserted?.created_at || payload.signed_at,
+  payload
+}));
+
+showMsg("ok", "✅ 已提交並寫入資料庫");
+location.hash = "#success";
 }catch(err){
   console.error(err);
-  showMsg("err", "⚠️ 提交失敗（Supabase 寫入錯誤），請稍後再試。");
+  showMsg("err", "⚠️ 提交失敗，請稍後再試。");
 }finally{
   submitBtn.disabled = false;
   if (submitLabel) submitLabel.textContent = "確認並提交契約";
