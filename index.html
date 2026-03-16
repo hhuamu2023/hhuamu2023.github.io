@@ -864,7 +864,7 @@ background: var(--bg);
 
       <input type="time" name="pickup_time" id="pickupTime" class="w-full cute-input px-4 py-3" />
       <input type="text" id="pickupTimeText" class="hidden w-full cute-input px-4 py-3 bg-gray-100 text-gray-500 font-black text-center"
-             value="另行通知接回時間" readonly />
+             value="另行通知美容完成時間" readonly />
     </div>
 
     <div class="mt-3 bg-hanamu-green/5 border border-hanamu-green/15 rounded-2xl p-4 text-xs font-bold text-hanamu-dark leading-relaxed">
@@ -1956,7 +1956,7 @@ try{
 
   // 補上「另行通知」的接回時間文字（不然會是空字串）
   payload.pickup_time = (typeof isNotifyLater !== "undefined" && isNotifyLater)
-    ? "另行通知接回時間"
+    ? "另行通知美容完成時間"
     : (document.getElementById("pickupTime")?.value || "");
 
   // 服務=其他項目時，把說明也存進 payload
