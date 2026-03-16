@@ -273,59 +273,6 @@ background: var(--bg);
   padding: .75rem;
   padding-bottom: max(.75rem, env(safe-area-inset-bottom));
 }
-/* ✅ Success：固定副本 header + 浮雕副本卡 + 章印 */
-.success-topbar{
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: rgba(255,255,255,.86);
-  border-bottom: 1px solid rgba(196,140,147,.16);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.receipt-emboss{
-  background: rgba(255,255,255,.82);
-  border: 1px solid rgba(196,140,147,.18);
-  box-shadow:
-    0 22px 60px rgba(196,140,147,.12),
-    inset 0 1px 0 rgba(255,255,255,.70),
-    inset 0 -10px 30px rgba(196,140,147,.06);
-  border-radius: 1.75rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.receipt-stamp{
-  position:absolute;
-  top: 18px;
-  right: 18px;
-  transform: rotate(10deg);
-  border: 2px solid rgba(196,140,147,.55);
-  color: rgba(185,116,130,.95);
-  background: rgba(255,255,255,.70);
-  padding: 8px 10px;
-  border-radius: 14px;
-  font-weight: 900;
-  letter-spacing: .12em;
-  font-size: 11px;
-  text-transform: uppercase;
-  box-shadow: 0 10px 24px rgba(196,140,147,.18);
-}
-
-.receipt-divider{
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(196,140,147,.28), transparent);
-}
-
-.print-hide{ display:block; }
-@media print{
-  header, .success-topbar, .bg-blob, #info, footer, #btnBackHome { display:none !important; }
-  main{ max-width: 900px !important; }
-  .print-hide{ display:none !important; }
-  body{ background: #fff !important; }
-  .receipt-emboss{ box-shadow:none !important; border: 1px solid #ddd !important; }
-}
 /* ✅ 舊客彈窗 */
 #petSelectModal{
   position: fixed;
@@ -626,15 +573,20 @@ background: var(--bg);
     </div>
 
     <div>
-      <label class="text-sm font-black text-hanamu-wood">電子信箱 <span class="text-red-500">*</span></label>
-      <input name="owner_email" type="email" required class="mt-2 w-full cute-input px-4 py-3" placeholder="example@mail.com" />
+      <label class="text-sm font-black text-hanamu-wood">電子信箱 <span class="text-[11px] font-black text-gray-400">(選填)</span></label>
+      <input name="owner_email" type="email" class="mt-2 w-full cute-input px-4 py-3" placeholder="example@mail.com（寄送契約副本用）" />
     </div>
 
     <div>
       <label class="text-sm font-black text-hanamu-wood">身分證字號 <span class="text-red-500">*</span></label>
-      <input name="owner_id" required maxlength="10" autocapitalize="characters"
-             class="mt-2 w-full cute-input px-4 py-3 tracking-wider"
-             placeholder="A123456789" />
+<input name="owner_id"
+       required
+       maxlength="10"
+       autocapitalize="characters"
+       inputmode="text"
+       class="mt-2 w-full cute-input px-4 py-3 tracking-wider"
+       placeholder="A123456789"
+       oninput="ownerIdUppercaseFirst(this)" />
     </div>
 
     <div>
@@ -644,10 +596,16 @@ background: var(--bg);
       </label>
 
       <div class="mt-2 flex gap-2 items-stretch">
-        <input name="owner_phone" required inputmode="numeric" maxlength="10"
-               class="w-full cute-input px-4 py-3 tracking-widest text-base"
-               placeholder="09xxxxxxxx"
-               oninput="digitsOnly(this)" />
+<input name="owner_phone"
+       required
+       inputmode="numeric"
+       maxlength="10"
+       minlength="10"
+       pattern="^09[0-9]{8}$"
+       title="請輸入 10 碼手機號碼，格式需為 09 開頭（例如：0912345678）"
+       class="w-full cute-input px-4 py-3 tracking-widest text-base"
+       placeholder="09xxxxxxxx"
+       oninput="digitsOnly(this)" />
 
         <button type="button" id="searchBtn"
                 onclick="searchOldCustomer()"
@@ -670,10 +628,13 @@ background: var(--bg);
 
     <div>
       <label class="text-sm font-black text-hanamu-wood">緊急電話 <span class="text-red-500">*</span></label>
-      <input name="emergency_phone" required inputmode="numeric"
-             class="mt-2 w-full cute-input px-4 py-3"
-             placeholder="電話"
-             oninput="digitsOnly(this)" />
+<input name="emergency_phone"
+       required
+       inputmode="numeric"
+       maxlength="10"
+       class="mt-2 w-full cute-input px-4 py-3"
+       placeholder="電話"
+       oninput="digitsOnly(this)" />
     </div>
 
     <div class="md:col-span-2">
@@ -724,11 +685,12 @@ background: var(--bg);
           <option value="unknown">有晶片(號碼不詳)</option>
           <option value="no_chip">無晶片</option>
         </select>
-        <input name="pet_chip" id="petChip"
-               class="w-full cute-input px-4 py-3"
-               placeholder="請輸入10或15碼數字"
-               inputmode="numeric"
-               oninput="digitsOnly(this)" />
+<input name="pet_chip" id="petChip"
+       class="w-full cute-input px-4 py-3"
+       placeholder="請輸入晶片號碼（最多15碼）"
+       inputmode="numeric"
+       maxlength="15"
+       oninput="digitsOnly(this)" />
       </div>
       <div class="text-[11px] font-bold text-gray-500 mt-2">有晶片時請填 10 或 15 碼數字</div>
     </div>
@@ -815,7 +777,7 @@ background: var(--bg);
 <section class="cute-card p-7 md:p-8 space-y-5" id="secService">
   <div class="flex items-center gap-3 border-b-2 border-dashed border-hanamu-wood/10 pb-4">
     <div class="text-2xl">🛁</div>
-    <h3 class="text-lg font-black text-hanamu-dark">本次服務內容</h3>
+    <h3 class="text-lg font-black text-hanamu-dark">本次服務內容<span class="text-red-500">*</span></h3>
   </div>
 
   <!-- 服務項目（單選） -->
@@ -854,7 +816,7 @@ background: var(--bg);
 
   <!-- 接回時間 -->
   <div class="pt-2 border-t border-dashed border-hanamu-wood/10">
-    <label class="text-sm font-black text-hanamu-wood">預計接回時間</label>
+    <label class="text-sm font-black text-hanamu-wood">預計接回時間<span class="text-red-500">*</span></label>
 
     <div class="mt-2 flex gap-3 items-stretch">
       <button type="button" id="btnNotifyLater" onclick="togglePickupTimeMode()"
@@ -862,10 +824,14 @@ background: var(--bg);
         另行通知
       </button>
 
-      <input type="time" name="pickup_time" id="pickupTime" class="w-full cute-input px-4 py-3" />
+<input type="time" name="pickup_time" id="pickupTime" required class="w-full cute-input px-4 py-3" />
       <input type="text" id="pickupTimeText" class="hidden w-full cute-input px-4 py-3 bg-gray-100 text-gray-500 font-black text-center"
              value="另行通知美容完成時間" readonly />
     </div>
+    <!-- ✅ 接回時間錯誤提示（送出未填會顯示） -->
+<div id="pickupErr" class="hidden mt-2 text-xs font-black text-hanamu-red">
+  ⚠️ 請選擇預計接回時間，或點選「另行通知」。
+</div>
 
     <div class="mt-3 bg-hanamu-green/5 border border-hanamu-green/15 rounded-2xl p-4 text-xs font-bold text-hanamu-dark leading-relaxed">
       逾時 <span class="text-hanamu-green font-black">2 小時</span> 以上，將酌收
@@ -880,39 +846,39 @@ background: var(--bg);
           <h3 class="text-lg font-black text-hanamu-dark">條款閱讀與數位簽署</h3>
         </div>
 
-<div class="bg-hanamu-bg p-5 rounded-2xl border border-hanamu-wood/10 text-sm">
+<div class="bg-hanamu-bg p-5 rounded-2xl border border-hanamu-wood/10 text-sm" id="shopInfoCard">
   <div class="font-black text-hanamu-wood mb-2">乙方（店家）資訊</div>
 
   <div class="grid md:grid-cols-2 gap-3 text-[13px]">
 
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">店家名稱</span>
-      <span class="font-black">花沐寵物沙龍</span>
+      <span class="font-black" id="shop_name">花沐寵物沙龍</span>
     </div>
 
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">負責人</span>
-      <span class="font-black">（負責人姓名）</span>
+      <span class="font-black" id="shop_owner">（負責人姓名）</span>
     </div>
 
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">聯絡電話</span>
-      <a class="font-black text-hanamu-dark underline" href="tel:請填電話只留數字">（電話）</a>
+      <a class="font-black text-hanamu-dark underline" id="shop_phone" href="tel:請填電話只留數字">（電話）</a>
     </div>
 
     <div class="md:col-span-2">
       <span class="text-gray-400 font-bold block text-[11px]">地址</span>
-      <span class="font-black">708臺南市安平區文平路65號</span>
+      <span class="font-black" id="shop_address">708臺南市安平區文平路65號</span>
     </div>
 
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">營業時間</span>
-      <span class="font-black">10:30 – 19:00</span>
+      <span class="font-black" id="shop_hours">10:30 – 19:00</span>
     </div>
 
     <div>
       <span class="text-gray-400 font-bold block text-[11px]">店休日</span>
-      <span class="font-black text-hanamu-red">(每週一店休)</span>
+      <span class="font-black text-hanamu-red" id="shop_holiday">(每週一店休)</span>
     </div>
 
     <div class="md:col-span-2 pt-2 border-t border-dashed border-hanamu-wood/10">
@@ -921,12 +887,12 @@ background: var(--bg);
       <div class="mt-2 bg-white rounded-2xl border border-hanamu-wood/10 p-4 space-y-2">
         <div>
           <span class="text-gray-400 font-bold block text-[11px]">特約醫院名字</span>
-          <span class="font-black">（醫院名稱）</span>
+          <span class="font-black" id="shop_er_name">（醫院名稱）</span>
         </div>
 
         <div>
           <span class="text-gray-400 font-bold block text-[11px]">地址</span>
-          <span class="font-black">（醫院地址）</span>
+          <span class="font-black" id="shop_er_address">（醫院地址）</span>
         </div>
       </div>
     </div>
@@ -985,107 +951,62 @@ background: var(--bg);
     </div>
   </section>
 
-<!-- ✅ 成功頁（view-success）：契約副本（可截圖） -->
-<section id="view-success" class="hidden">
-  <!-- ✅ 固定頂部：副本 header（像宿洗） -->
-  <div class="success-topbar">
-    <div class="max-w-3xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
-      <a href="#home" class="print-hide flex items-center gap-2 text-xs font-black text-hanamu-wood hover:bg-hanamu-wood/10 px-4 py-2 rounded-full transition-colors">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i> 返回首頁
-      </a>
+<!-- ✅ 成功頁（view-success）：宿洗風格（花沐版） -->
+<section id="view-success" class="hidden pt-10">
+  <div class="max-w-md mx-auto px-5 pb-24">
+    <div class="glass-card p-7 md:p-9 text-center relative overflow-hidden">
 
-      <div class="text-center">
-        <div class="text-[11px] font-black text-gray-400 tracking-widest uppercase">Contract Copy</div>
-        <div class="text-sm font-black text-hanamu-dark">契約副本（可截圖保存）</div>
-      </div>
+      <div class="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-hanamu-accent/15 blur-2xl"></div>
 
-      <button type="button" onclick="window.print()"
-              class="print-hide flex items-center gap-2 text-xs font-black bg-hanamu-green text-white px-4 py-2 rounded-full shadow-lg shadow-hanamu-green/20 active:scale-[0.99] transition">
-        <i data-lucide="printer" class="w-4 h-4"></i> 列印/PDF
-      </button>
-    </div>
-  </div>
+      <!-- icon -->
+<div id="succIconWrap"
+     class="mx-auto w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+  <i id="succIcon" data-lucide="check" class="w-8 h-8 text-emerald-700"></i>
+</div>
 
-  <div class="max-w-3xl mx-auto px-5 pb-24 pt-6">
-    <!-- ✅ 副本卡 -->
-    <div id="receiptCard" class="receipt-emboss p-6 md:p-8">
-      <div class="receipt-stamp">已簽署</div>
+      <h2 id="succTitle" class="mt-4 text-2xl font-black text-hanamu-dark tracking-tight">
+        提交成功！
+      </h2>
+      <p id="succSubtitle" class="mt-2 text-xs font-bold text-gray-500">
+        請保存契約副本（建議也截圖備份）
+      </p>
 
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <div class="text-base font-black text-hanamu-dark">花沐寵物沙龍｜美容數位契約</div>
-          <div class="mt-1 text-[11px] font-bold text-gray-500">
-            合約編號：<span id="rc_id">—</span>
-            <span class="mx-2">｜</span>
-            簽署時間：<span id="rc_time">—</span>
+      <!-- hint box (動態：有無 Email / 是否寄送成功) -->
+      <div id="succHintBox" class="mt-5 p-4 rounded-2xl border-2 bg-rose-50 border-rose-200 text-left">
+        <div class="flex items-start gap-3">
+          <div id="succHintIconWrap"
+               class="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-white border border-rose-200">
+            <i id="succHintIcon" data-lucide="alert-circle" class="w-5 h-5 text-rose-700"></i>
           </div>
-        </div>
 
-        <div class="shrink-0 w-11 h-11 rounded-full bg-hanamu-green text-white flex items-center justify-center shadow-lg shadow-hanamu-green/20">
-          <i data-lucide="file-check" class="w-5 h-5"></i>
-        </div>
-      </div>
-
-      <div class="mt-5 receipt-divider"></div>
-
-      <!-- 摘要（方便截圖） -->
-      <div class="mt-5 grid gap-4 text-[13px]">
-        <div class="grid md:grid-cols-2 gap-2">
-          <div><span class="text-gray-400 font-bold">飼主姓名：</span><span id="rc_owner_name" class="font-black">—</span></div>
-          <div><span class="text-gray-400 font-bold">聯絡手機：</span><span id="rc_owner_phone" class="font-black">—</span></div>
-          <div class="md:col-span-2"><span class="text-gray-400 font-bold">Email：</span><span id="rc_owner_email" class="font-black">—</span></div>
-          <div class="md:col-span-2"><span class="text-gray-400 font-bold">通訊地址：</span><span id="rc_owner_address" class="font-black">—</span></div>
-        </div>
-
-        <div class="receipt-divider"></div>
-
-        <div class="grid md:grid-cols-2 gap-2">
-          <div><span class="text-gray-400 font-bold">毛孩名字：</span><span id="rc_pet_name" class="font-black">—</span></div>
-          <div><span class="text-gray-400 font-bold">年齡：</span><span id="rc_pet_age" class="font-black">—</span> 歲</div>
-          <div><span class="text-gray-400 font-bold">品種：</span><span id="rc_pet_breed" class="font-black">—</span></div>
-          <div><span class="text-gray-400 font-bold">花色：</span><span id="rc_pet_color" class="font-black">—</span></div>
-          <div><span class="text-gray-400 font-bold">性別：</span><span id="rc_pet_sex" class="font-black">—</span></div>
-          <div><span class="text-gray-400 font-bold">結紮：</span><span id="rc_is_neutered" class="font-black">—</span></div>
-          <div class="md:col-span-2"><span class="text-gray-400 font-bold">晶片：</span><span id="rc_pet_chip" class="font-black">—</span></div>
-        </div>
-
-        <div class="receipt-divider"></div>
-
-        <div class="grid md:grid-cols-2 gap-2">
-          <div><span class="text-gray-400 font-bold">服務項目：</span><span id="rc_service_type" class="font-black">—</span></div>
-          <div><span class="text-gray-400 font-bold">接回時間：</span><span id="rc_pickup_time" class="font-black">—</span></div>
-        </div>
-
-        <div class="bg-hanamu-green/5 border border-hanamu-green/15 rounded-2xl p-4 text-xs font-bold text-hanamu-dark leading-relaxed">
-          逾時 <span class="text-hanamu-green font-black">2 小時</span> 以上，將酌收
-          <span class="text-hanamu-green font-black">$150/小時</span> 逾時費。
-        </div>
-
-        <div class="receipt-divider"></div>
-
-        <!-- ✅ 條款全文（直接複製自 modal 內容） -->
-        <div>
-          <div class="font-black text-hanamu-wood mb-2">契約條款全文</div>
-          <div id="rc_terms" class="bg-white/80 rounded-2xl border border-hanamu-wood/10 p-4 leading-relaxed text-[13px] text-gray-700 whitespace-pre-wrap"></div>
-        </div>
-
-        <!-- ✅ 簽名與簽署時間 -->
-        <div class="bg-white rounded-2xl border-2 border-hanamu-wood/20 p-4">
-          <div class="font-black text-hanamu-wood mb-2">數位簽名</div>
-          <div class="flex justify-center">
-            <img id="rc_signature" alt="signature" class="max-h-28 object-contain" />
-          </div>
-          <div class="text-[11px] font-bold text-gray-500 text-right mt-2">
-            簽署時間：<span id="rc_signed_at"></span>
+          <div class="flex-1">
+            <div id="succHintTitle" class="font-black text-hanamu-dark text-sm">提醒：未填寫電子信箱</div>
+            <div id="succHintText" class="text-xs font-bold text-gray-700 mt-1 leading-relaxed">
+              因未填寫 Email，我們無法寄送契約副本。請務必使用手機截圖保存，或點下方按鈕開啟完整版副本。
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="print-hide mt-6 grid gap-3">
-      <a href="#grooming" class="w-full py-4 rounded-2xl border-2 border-hanamu-green/30 bg-white font-black text-hanamu-green active:scale-[0.99] transition text-center">
-        再填一份新的契約
-      </a>
+      <!-- actions -->
+      <div class="mt-5 grid gap-3">
+        <button type="button" id="btnOpenFullContract"
+                class="w-full py-4 rounded-2xl bg-hanamu-green text-white font-black shadow-lg shadow-hanamu-green/20 active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <i data-lucide="file-text" class="w-5 h-5"></i>
+          查看完整契約副本（可截圖保存）
+        </button>
+
+        <a href="#home"
+           class="w-full py-4 rounded-2xl bg-white border-2 border-hanamu-wood/20 text-hanamu-wood font-black
+                  active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <i data-lucide="home" class="w-5 h-5"></i>
+          返回首頁（完成）
+        </a>
+      </div>
+
+      <div class="mt-4 text-[11px] font-bold text-gray-400 leading-relaxed">
+        若按鈕無法開啟新頁，請檢查瀏覽器是否阻擋彈出視窗，或直接截圖保存本頁提示。
+      </div>
     </div>
   </div>
 </section>
@@ -1470,7 +1391,10 @@ function fillFormWithPayload(p){
     if(sel) sel.value = (p || {}).chip_status;
     if(typeof toggleChipInput === "function") toggleChipInput();
   }
-
+// ✅ 使用者填接回時間後，自動清除錯誤提示
+document.getElementById("pickupTime")?.addEventListener("input", () => {
+  clearPickupError();
+});
   // =========================================================
   // ✅ 重點：清空「本次服務內容」相關欄位（不帶入）
   // =========================================================
@@ -1562,56 +1486,97 @@ function renderSuccessReceipt(){
 
   let obj;
   try { obj = JSON.parse(raw); } catch(e){ return; }
+
   const p = obj.payload || {};
+  const email = (p.owner_email || "").trim();
+  const hasEmail = !!email;
+  const emailSent = !!obj.email_sent; // 仍可用於文案提醒
+  const fullHtml = (obj.contract_html || obj.contractHtml || "").trim();
 
-  const set = (id, v) => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.textContent = (v === undefined || v === null || v === "") ? "—" : String(v);
-  };
+  const titleEl = document.getElementById("succTitle");
+  const subEl = document.getElementById("succSubtitle");
 
-  set("rc_id", obj.id || "—");
-  set("rc_time", (obj.created_at || p.signed_at || "").replace("T"," ").replace("Z",""));
+  const box = document.getElementById("succHintBox");
+  const iconWrap = document.getElementById("succHintIconWrap");
+  const icon = document.getElementById("succHintIcon");
+  const hintTitle = document.getElementById("succHintTitle");
+  const hintText = document.getElementById("succHintText");
 
-  set("rc_owner_name", p.owner_name);
-  set("rc_owner_phone", p.owner_phone);
-  set("rc_owner_email", p.owner_email);
-  set("rc_owner_address", p.owner_address);
+  const succIconWrap = document.getElementById("succIconWrap");
+  const succIcon = document.getElementById("succIcon");
 
-  set("rc_pet_name", p.pet_name);
-  set("rc_pet_age", p.pet_age);
-  set("rc_pet_breed", p.pet_breed);
-  set("rc_pet_color", p.pet_color);
-  set("rc_pet_sex", p.pet_sex);
-  set("rc_is_neutered", p.is_neutered);
+  // 標題
+  if(titleEl) titleEl.textContent = "提交成功！";
+  if(subEl) subEl.textContent = "請保存契約副本（建議也截圖備份）";
 
-  // 晶片顯示（含狀態）
-  const chip = p.chip_status === "no_chip" ? "無晶片"
-            : p.chip_status === "unknown" ? "有晶片（號碼不詳）"
-            : (p.pet_chip ? `有晶片（${p.pet_chip}）` : "—");
-  set("rc_pet_chip", chip);
+  // ✅ 兩狀態：有 Email = 綠、沒 Email = 紅
+  if(box && hintTitle && hintText && iconWrap && icon && succIconWrap && succIcon){
+    if(hasEmail){
+      // 綠色成功
+      succIconWrap.className = "mx-auto w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center";
+      succIcon.setAttribute("data-lucide", "check");
+      succIcon.className = "w-8 h-8 text-emerald-700";
 
-  // 服務內容 + 其他項目
-  let service = p.service_type || "—";
-  if(service === "其他項目" && p.other_service_desc) service = `其他項目（${p.other_service_desc}）`;
-  set("rc_service_type", service);
+      box.className = "mt-5 p-4 rounded-2xl border-2 bg-emerald-50 border-emerald-200 text-left";
+      iconWrap.className = "shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-white border border-emerald-200";
+      icon.setAttribute("data-lucide", "mail");
+      icon.className = "w-5 h-5 text-emerald-700";
 
-  set("rc_pickup_time", p.pickup_time || "—");
+      hintTitle.textContent = emailSent ? "契約副本已寄出" : "已填寫 Email（若未收到請先截圖保存）";
+      hintText.textContent = emailSent
+        ? `我們已將契約副本寄至 ${email}，請至信箱查收。也建議您先開啟完整版並截圖保存。`
+        : `已填寫 Email：${email}。若稍後未收到信件，請先開啟完整版並截圖保存。`;
+    }else{
+      // 紅色提醒
+      succIconWrap.className = "mx-auto w-16 h-16 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center";
+      succIcon.setAttribute("data-lucide", "alert-circle");
+      succIcon.className = "w-8 h-8 text-rose-700";
 
-  // 簽署時間（副本卡底部）
-  const signedAt = (p.signed_at || obj.created_at || "").replace("T"," ").replace("Z","");
-  set("rc_signed_at", signedAt || "—");
+      box.className = "mt-5 p-4 rounded-2xl border-2 bg-rose-50 border-rose-200 text-left";
+      iconWrap.className = "shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-white border border-rose-200";
+      icon.setAttribute("data-lucide", "alert-circle");
+      icon.className = "w-5 h-5 text-rose-700";
 
-  // 條款全文：從 modal 內容抓文字
-  const termsEl = document.getElementById("termsBody");
-  const rcTerms = document.getElementById("rc_terms");
-  if(termsEl && rcTerms){
-    rcTerms.textContent = (termsEl.innerText || "").trim();
+      hintTitle.textContent = "提醒：未填寫電子信箱";
+      hintText.textContent = "因未填寫 Email，我們無法寄送契約副本。請務必開啟完整版並截圖保存。";
+    }
   }
 
-  // 簽名圖片（Storage URL）
-  const img = document.getElementById("rc_signature");
-  if(img) img.src = p.signature_url || "";
+  // 開完整版按鈕
+  const btn = document.getElementById("btnOpenFullContract");
+  if(btn && !btn.__bound){
+    btn.__bound = true;
+    btn.addEventListener("click", () => openFullContractWindow(fullHtml));
+  }
+
+  // 沒有 HTML 就禁用
+  if(btn){
+    const ok = !!fullHtml;
+    btn.disabled = !ok;
+    btn.classList.toggle("opacity-50", !ok);
+    btn.classList.toggle("cursor-not-allowed", !ok);
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+// ✅ 打開「完整契約副本 HTML」（像宿洗 success）
+function openFullContractWindow(html){
+  const safeHtml = (html || "").trim();
+  if(!safeHtml){
+    showMsg("err", "⚠️ 目前尚未產生完整契約副本，請先用截圖保存此頁。");
+    return;
+  }
+
+  const w = window.open("", "_blank");
+  if(!w){
+    showMsg("err", "⚠️ 無法開啟新視窗，請檢查瀏覽器是否阻擋彈出視窗。");
+    return;
+  }
+
+  w.document.open();
+  w.document.write(safeHtml);
+  w.document.close();
 }
 
 function renderRoute(){
@@ -1629,10 +1594,13 @@ function renderRoute(){
     btnBackHome.classList.toggle("flex", inGrooming || inSuccess);
   }
 
-  if (inSuccess) renderSuccessReceipt();
+  if (inSuccess) {
+    renderSuccessReceipt();
+
+  }
 
   if (window.lucide) window.lucide.createIcons();
-  window.scrollTo({ top: 0, behavior: "instant" });
+  window.scrollTo({ top: 0, behavior: "auto" });
 }
 
 window.addEventListener("hashchange", renderRoute);
@@ -1698,45 +1666,61 @@ function closeTerms(){
 function digitsOnly(input){
   input.value = (input.value || "").replace(/[^\d]/g, "");
 }
+// ✅ 身分證：首字母自動轉大寫（其餘不動）
+// 例如：a123456789 → A123456789
+function ownerIdUppercaseFirst(input){
+  let v = (input.value || "");
+  if(!v) return;
 
-// ✅ 晶片狀態切換（無晶片/不詳 → 禁用輸入）
+  const first = v.charAt(0).toUpperCase();
+  const rest  = v.slice(1);
+  input.value = first + rest;
+}
+
+// ✅ 晶片狀態切換（無晶片/不詳 → 禁用輸入）+ 有晶片時 required
 function toggleChipInput(){
   const sel = document.getElementById("chipStatus");
   const input = document.getElementById("petChip");
   if(!sel || !input) return;
 
   const v = sel.value;
+
   if(v === "no_chip"){
     input.value = "";
     input.disabled = true;
+    input.required = false;                 // ✅ 無晶片不必填
     input.placeholder = "無晶片免填";
     input.classList.add("opacity-50");
   }else if(v === "unknown"){
     input.value = "";
     input.disabled = true;
+    input.required = false;                 // ✅ 號碼不詳不必填
     input.placeholder = "號碼不詳";
     input.classList.add("opacity-50");
   }else{
     input.disabled = false;
+    input.required = true;                  // ✅ 有晶片才必填
     input.placeholder = "請輸入10或15碼數字";
     input.classList.remove("opacity-50");
   }
 }
 toggleChipInput();
 
-// ✅ 服務選到「其他項目」才顯示說明欄
+// ✅ 服務選到「其他項目」才顯示說明欄 + 同時切換 required
 function toggleOtherServiceInput(){
   const isOther = document.querySelector('input[name="service_type"][value="其他項目"]')?.checked;
   const area = document.getElementById("otherServiceInputArea");
   const desc = document.getElementById("otherServiceDesc");
-  if(!area) return;
+  if(!area || !desc) return;
 
   if(isOther){
     area.classList.remove("hidden");
-    setTimeout(()=> desc?.focus(), 50);
+    desc.required = true;              // ✅ 只有選其他項目才必填
+    setTimeout(()=> desc.focus(), 50);
   }else{
     area.classList.add("hidden");
-    if(desc) desc.value = "";
+    desc.required = false;             // ✅ 取消必填
+    desc.value = "";
   }
 }
 
@@ -1751,18 +1735,46 @@ function togglePickupTimeMode(){
 
   if(!timeInput || !textInput || !btn) return;
 
+  // ✅ 一切換就先清掉錯誤提示
+  clearPickupError();
+
   if(isNotifyLater){
     timeInput.classList.add("hidden");
     textInput.classList.remove("hidden");
     timeInput.value = "";
+    timeInput.required = false;
+
     btn.classList.add("bg-hanamu-green","text-white");
     btn.classList.remove("bg-white","text-hanamu-green");
   }else{
     timeInput.classList.remove("hidden");
     textInput.classList.add("hidden");
+    timeInput.required = true;
+
     btn.classList.remove("bg-hanamu-green","text-white");
     btn.classList.add("bg-white","text-hanamu-green");
   }
+}
+
+// ✅ 接回時間：錯誤樣式控制
+function setPickupError(on){
+  const timeInput = document.getElementById("pickupTime");
+  const err = document.getElementById("pickupErr");
+  if(err) err.classList.toggle("hidden", !on);
+
+  // time input 紅框
+  if(timeInput){
+    if(on){
+      timeInput.classList.add("border-red-400","bg-red-50");
+    }else{
+      timeInput.classList.remove("border-red-400","bg-red-50");
+    }
+  }
+}
+
+// ✅ 接回時間：清除錯誤（用在切換/輸入時）
+function clearPickupError(){
+  setPickupError(false);
 }
 let __scrollY = 0;
 function lockPageScroll(){
@@ -1911,6 +1923,402 @@ function showMsg(type, text){
   __toastTimer = setTimeout(()=>{ toast.style.display = "none"; }, 2200);
 }
 
+function escapeHtml(s){
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function safeText(s){
+  return escapeHtml((s ?? "").toString().trim()) || "—";
+}
+
+// 專門把 modal 裡的條款，轉成「乾淨條列 HTML」
+function buildTermsHtmlFromModal(){
+  const root = document.getElementById("termsBody");
+  if(!root) return "<div>（無條款內容）</div>";
+
+  // ===== helpers (email-safe spacing / table layout) =====
+  const spacer = (h) => `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td height="${h}" style="height:${h}px;line-height:${h}px;font-size:0;">&nbsp;</td></tr>
+    </table>
+  `;
+
+  const oneLine = (t) => {
+    return String(t ?? "")
+      .replace(/\r/g, "")
+      .replace(/\u00A0/g, " ")
+      .split("\n")
+      .map(s => s.trim())
+      .filter(Boolean)
+      .join(" ")
+      .replace(/[ \t]{2,}/g, " ")
+      .trim();
+  };
+
+  const cleanBulletText = (t) => {
+    // 去掉前面可能出現的符號（• ● - 等）
+    return oneLine(t).replace(/^[•●\-—–\s]+/g, "").trim();
+  };
+
+  const dotTable = (lines, dotColor, textColor) => {
+    if(!lines || lines.length === 0) return "";
+    return `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;">
+        ${lines.map(t => `
+          <tr>
+            <td width="16" style="width:16px;vertical-align:top;padding-top:9px;">
+              <span style="display:inline-block;width:8px;height:8px;background:${dotColor};border-radius:999px;line-height:8px;font-size:8px;">&nbsp;</span>
+            </td>
+            <td style="vertical-align:top;padding:6px 0;color:${textColor};font-size:13px;line-height:1.75;font-weight:700;">
+              ${pillify(t)}
+            </td>
+          </tr>
+        `).join("")}
+      </table>
+    `;
+  };
+
+  const sectionCard = (title, innerHtml, tone = "plain") => {
+    const bg = (tone === "tint") ? "rgba(196,140,147,.06)" : "#ffffff";
+    const border = (tone === "tint") ? "rgba(196,140,147,.18)" : "rgba(155,122,94,.14)";
+    return `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;border-spacing:0;">
+        <tr>
+          <td style="border:1px solid ${border};background:${bg};border-radius:14px;padding:12px;">
+            <div style="font-weight:900;color:#9B7A5E;font-size:13px;margin:0 0 8px;">${escapeHtml(title)}</div>
+            ${innerHtml}
+          </td>
+        </tr>
+      </table>
+    `;
+  };
+
+  const clauseMiniCard = (title, body, index) => {
+    const safeTitle = escapeHtml(title || `條款 ${index+1}`);
+    const safeBody = pillify(body || "—");
+
+    // 小卡：用 table 包，email/Outlook 相對穩
+    return `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;border-spacing:0;">
+        <tr>
+          <td style="border:1px solid rgba(155,122,94,.14);background:#ffffff;border-radius:14px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;border-spacing:0;">
+              <tr>
+                <td style="padding:10px 12px;background:rgba(196,140,147,.08);border-bottom:1px solid rgba(196,140,147,.18);
+                           border-radius:14px 14px 0 0;">
+                  <div style="font-weight:900;color:#111827;font-size:13px;line-height:1.4;">
+                    ${safeTitle}
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:10px 12px;color:#374151;font-size:13px;line-height:1.75;font-weight:700;">
+                  ${safeBody}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    `;
+  };
+
+    // ===== red pill keywords (你要紅底標籤的關鍵字) =====
+  const HIGHLIGHT_WORDS = [
+    "不涉及醫療行為",
+    "乙方不負責損害賠償責任",
+    "全部損失",
+    "加收安親費",
+    "視同住宿一晚計費"
+  ];
+
+  // 把文字先 escape，再把關鍵字換成紅底膠囊（email-safe）
+  const pillify = (text) => {
+    let html = escapeHtml(text || "");
+    HIGHLIGHT_WORDS.forEach(w => {
+      const ew = escapeHtml(w || "");
+      if(!ew) return;
+      html = html.split(ew).join(
+        `<span style="display:inline-block;padding:2px 8px;border-radius:999px;` +
+        `background:#FEF2F2;border:1px solid #FECACA;color:#B91C1C;` +
+        `font-weight:900;line-height:1.4;">${ew}</span>`
+      );
+    });
+    return html;
+  };
+
+  // ===== 1) 找到「重點提醒」區塊 =====
+  const reminderTitleEl = [...root.querySelectorAll("div.font-black")].find(el =>
+    (el.textContent || "").trim() === "重點提醒"
+  );
+  const reminderBox = reminderTitleEl ? reminderTitleEl.parentElement : null;
+
+  const reminders = reminderBox
+    ? [...reminderBox.querySelectorAll("li")]
+        .map(li => {
+          // 你的 li 前面有一個 span 圓點，text 會混在一起，這裡做清潔
+          const raw = (li.innerText || li.textContent || "").trim();
+          return cleanBulletText(raw);
+        })
+        .filter(Boolean)
+    : [];
+
+  // ===== 2) 找到「條款內容」區塊（ol/li）=====
+  const clausesTitleEl = [...root.querySelectorAll("div.font-black")].find(el =>
+    (el.textContent || "").trim() === "條款內容"
+  );
+  const clausesBox = clausesTitleEl ? clausesTitleEl.parentElement : null;
+
+  const ol = (clausesBox && clausesBox.querySelector("ol")) ? clausesBox.querySelector("ol") : root.querySelector("ol");
+  const clauseLis = ol ? [...ol.querySelectorAll(":scope > li")] : [];
+
+  const clauses = clauseLis.map((li) => {
+    // title: 取 span.font-black
+    const title = (li.querySelector("span.font-black")?.innerText || li.querySelector("span.font-black")?.textContent || "").trim();
+
+    // body: 取整段 innerText，扣掉 title，並壓成一行（避免 email 空白怪）
+    const full = (li.innerText || li.textContent || "").trim();
+    let body = full;
+
+    if(title){
+      body = body.replace(title, "").trim();
+    }
+    body = body.replace(/^[\s:：\-—–]+/g, "").trim();
+    body = oneLine(body);
+
+    return {
+      title: title || "（未命名條款）",
+      body: body || "—"
+    };
+  });
+
+  // ===== 3) 找到底部補充（虛線那塊）=====
+  const footBox = [...root.querySelectorAll("div")].find(el =>
+    (el.className || "").includes("border-t") &&
+    ((el.innerText || el.textContent || "").includes("經甲乙雙方") || (el.innerText || el.textContent || "").includes("本人已確認"))
+  );
+
+  let footLines = [];
+  if(footBox){
+    footLines = String(footBox.innerText || footBox.textContent || "")
+      .replace(/\r/g, "")
+      .split("\n")
+      .map(s => cleanBulletText(s))
+      .filter(Boolean);
+  }
+
+  // ===== 4) 組 HTML：重點提醒(卡) + 條款(每條小卡) + 補充(卡) =====
+  const reminderHtml = reminders.length
+    ? sectionCard(
+        "重點提醒",
+        dotTable(reminders, "#C48C93", "#374151"),
+        "tint"
+      )
+    : "";
+
+  // ✅ 只輸出「每條條款小卡」，不再外面包一層「條款內容大卡」
+  const clauseCardsHtml = clauses.length
+    ? clauses.map((c, idx) => `
+        ${clauseMiniCard(c.title, c.body, idx)}
+        ${spacer(10)}
+      `).join("")
+    : `<div style="color:#6b7280;font-size:13px;font-weight:800;">（無條款內容）</div>`;
+
+  const footHtml = footLines.length
+    ? sectionCard(
+        "補充說明",
+        dotTable(footLines, "rgba(155,122,94,.55)", "#6b7280"),
+        "plain"
+      )
+    : "";
+
+  // ✅ 不再回傳外層大卡 out，直接回傳內容（減少卡片層數）
+  return `
+    ${reminderHtml ? reminderHtml + spacer(12) : ""}
+    ${clauseCardsHtml}
+    ${footHtml ? spacer(12) + footHtml : ""}
+  `;
+
+  return out;
+}
+
+// ✅ 你要「HTML 全寫在 index.html」就在這裡組版
+function buildContractHtml(payload, shopInfo, termsHtml, meta = {}){
+  const p = payload || {};
+  const shop = shopInfo || {};
+
+  const contractId = meta.id || "";
+  const signedAtISO = p.signed_at || meta.created_at || "";
+  const signedAt = signedAtISO ? String(signedAtISO).replace("T"," ").replace("Z","") : "";
+
+  // ✅ 晶片顯示
+  const chipText =
+    p.chip_status === "no_chip" ? "無晶片" :
+    p.chip_status === "unknown" ? "有晶片（號碼不詳）" :
+    (p.pet_chip ? `有晶片（${p.pet_chip}）` : "—");
+
+  // ✅ 服務內容（含其他項目）
+  let serviceText = p.service_type || "—";
+  if(serviceText === "其他項目"){
+    serviceText = p.other_service_desc ? `其他項目（${p.other_service_desc}）` : "其他項目（未填說明）";
+  }
+
+  const pickupText = p.pickup_time || "—";
+
+  const title = "花沐寵物沙龍｜美容契約副本";
+
+  // ✅ 產出一列 row（用 table，email 最穩）
+  const row = (k,v) => `
+    <tr>
+      <td style="padding:6px 0;color:#6b7280;font-weight:800;width:120px;vertical-align:top;">${escapeHtml(k)}</td>
+      <td style="padding:6px 0;font-weight:900;color:#111827;">${escapeHtml((v ?? "").toString().trim() || "—")}</td>
+    </tr>
+  `;
+
+  return `<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>${escapeHtml(title)}</title>
+</head>
+
+<body style="margin:0;background:#FFF7F5;font-family:Arial,'Noto Sans TC',sans-serif;color:#2B2B2B;">
+  <div style="max-width:760px;margin:0 auto;padding:18px;">
+    <div style="background:#ffffff;border:1px solid rgba(196,140,147,.25);border-radius:18px;padding:18px;">
+
+      <!-- Header -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+        <tr>
+          <!-- 左側：Logo + 標題 -->
+          <td style="vertical-align:top;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+              <tr>
+                <td style="vertical-align:top;padding-right:10px;">
+                  <img
+                    src="https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png"
+                    alt="花沐寵物沙龍"
+                    width="44"
+                    height="44"
+                    style="display:block;width:44px;height:44px;object-fit:contain;border:0;outline:none;text-decoration:none;border-radius:10px;"
+                  />
+                </td>
+                <td style="vertical-align:top;">
+                  <div style="font-size:18px;font-weight:900;margin:0 0 4px;line-height:1.2;color:#111827;">
+                    花沐寵物沙龍｜契約副本
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+
+          <!-- 右側：狀態 -->
+          <td style="vertical-align:top;text-align:right;white-space:nowrap;">
+            <div style="display:inline-block;border:2px solid rgba(196,140,147,.55);padding:8px 10px;border-radius:12px;
+                        font-size:11px;font-weight:900;letter-spacing:.12em;color:rgba(185,116,130,.95);">
+              已簽署
+            </div>
+          </td>
+        </tr>
+      </table>
+      <hr style="border:none;border-top:1px dashed rgba(196,140,147,.35);margin:14px 0;"/>
+
+      <!-- Shop -->
+      <h3 style="margin:0 0 8px;font-size:14px;color:#9B7A5E;">乙方（店家）資訊</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        ${row("店家名稱", shop.name)}
+        ${row("負責人", shop.owner)}
+        ${row("電話", shop.phone)}
+        ${row("地址", shop.address)}
+        ${row("營業時間", shop.hours)}
+        ${row("店休日", shop.holiday)}
+        ${row("特約緊急送醫", shop.er)}
+      </table>
+
+      <hr style="border:none;border-top:1px dashed rgba(196,140,147,.35);margin:14px 0;"/>
+
+      <!-- Owner -->
+      <h3 style="margin:0 0 8px;font-size:14px;color:#9B7A5E;">甲方（飼主）資訊</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        ${row("飼主姓名", p.owner_name)}
+        ${row("聯絡手機", p.owner_phone)}
+        ${row("Email", p.owner_email || "（未填寫）")}
+        ${row("身分證字號", p.owner_id)}
+        ${row("通訊地址", p.owner_address)}
+        ${row("緊急聯絡人", p.emergency_name)}
+        ${row("緊急電話", p.emergency_phone)}
+        ${row("指定就醫醫院", p.hospital)}
+      </table>
+
+      <hr style="border:none;border-top:1px dashed rgba(196,140,147,.35);margin:14px 0;"/>
+
+      <!-- Pet -->
+      <h3 style="margin:0 0 8px;font-size:14px;color:#9B7A5E;">寵物資訊</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        ${row("毛孩名字", p.pet_name)}
+        ${row("品種", p.pet_breed)}
+        ${row("花色", p.pet_color)}
+        ${row("年齡", (p.pet_age !== undefined && p.pet_age !== null && p.pet_age !== "") ? `${p.pet_age} 歲` : "—")}
+        ${row("性別", p.pet_sex)}
+        ${row("結紮", p.is_neutered)}
+        ${row("晶片", chipText)}
+        ${row("親人", p.is_friendly)}
+        ${row("親狗", p.is_dog_friendly)}
+        ${row("攻擊性", p.is_aggressive)}
+        ${row("過往病史", p.has_history)}
+        ${row("病史說明", p.history_notes)}
+      </table>
+
+      <hr style="border:none;border-top:1px dashed rgba(196,140,147,.35);margin:14px 0;"/>
+
+      <!-- Service -->
+      <h3 style="margin:0 0 8px;font-size:14px;color:#9B7A5E;">本次服務內容</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        ${row("服務項目", serviceText)}
+        ${row("接回時間", pickupText)}
+      </table>
+
+      <div style="margin-top:10px;background:rgba(196,140,147,.06);border:1px solid rgba(196,140,147,.18);
+                  border-radius:14px;padding:10px;font-size:12px;line-height:1.7;color:#111827;font-weight:800;">
+        逾時 2 小時以上，將酌收 $150/小時 逾時費。
+      </div>
+
+      <hr style="border:none;border-top:1px dashed rgba(196,140,147,.35);margin:14px 0;"/>
+
+      <!-- Terms (HTML list版) -->
+      <h3 style="margin:0 0 8px;font-size:14px;color:#9B7A5E;">條款內容</h3>
+      ${termsHtml || "<div>（無條款內容）</div>"}
+
+      <hr style="border:none;border-top:1px dashed rgba(196,140,147,.35);margin:14px 0;"/>
+
+      <!-- Signature -->
+      <h3 style="margin:0 0 8px;font-size:14px;color:#9B7A5E;">簽名檔</h3>
+      <div style="background:#fff;border:2px solid rgba(155,122,94,.18);border-radius:14px;padding:12px;text-align:center;">
+        ${p.signature_url
+          ? `<img alt="signature" src="${escapeHtml(p.signature_url)}" style="max-width:100%;max-height:180px;object-fit:contain;" />`
+          : `<div style="color:#6b7280;font-weight:900;">（無）</div>`
+        }
+      </div>
+
+      <div style="margin-top:10px;font-size:12px;color:#6b7280;font-weight:900;text-align:right;">
+        簽署時間：${escapeHtml(signedAt || "—")}
+      </div>
+
+      <div style="margin-top:10px;font-size:11px;color:#6b7280;font-weight:800;text-align:right;">
+        本郵件為系統自動寄送，請勿直接回覆
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -1926,6 +2334,21 @@ if(serviceType === "其他項目"){
     showMsg("err", "⚠️ 請填寫「其他項目」的服務說明。");
     return;
   }
+}
+// ✅ 接回時間必填驗證：沒選時間也沒按「另行通知」就擋
+const pickupTimeEl = document.getElementById("pickupTime");
+const pickupOk = (typeof isNotifyLater !== "undefined" && isNotifyLater)
+  ? true
+  : !!(pickupTimeEl && String(pickupTimeEl.value || "").trim());
+
+if(!pickupOk){
+  setPickupError(true);
+  showMsg("err", "⚠️ 請選擇預計接回時間，或點選「另行通知」。");
+  document.getElementById("secService")?.scrollIntoView({ behavior:"smooth", block:"center" });
+  pickupTimeEl?.focus?.();
+  return;
+}else{
+  setPickupError(false);
 }
 
     // 檢查條款
@@ -1987,12 +2410,67 @@ const { data: inserted, error: insertErr } = await sb
 
 if (insertErr) throw insertErr;
 
-// ✅ 給 success 用：存到 sessionStorage（方便顯示「契約副本」）
-sessionStorage.setItem("hanamu_last_contract", JSON.stringify({
+// ✅ 取條款（條列版 HTML，避免空白爆炸）
+const termsHtml = buildTermsHtmlFromModal();
+
+// ✅ 取乙方資訊（你成功頁也用同一套 id）
+const shopInfo = {
+  name: (document.getElementById("shop_name")?.textContent || "").trim(),
+  owner: (document.getElementById("shop_owner")?.textContent || "").trim(),
+  phone: (document.getElementById("shop_phone")?.textContent || "").trim(),
+  address: (document.getElementById("shop_address")?.textContent || "").trim(),
+  hours: ((document.getElementById("shop_hours")?.textContent || "").trim() + " " + (document.getElementById("shop_holiday")?.textContent || "").trim()).trim(),
+  holiday: (document.getElementById("shop_holiday")?.textContent || "").trim(),
+  er: ((document.getElementById("shop_er_name")?.textContent || "").trim() + "／" + (document.getElementById("shop_er_address")?.textContent || "").trim()).replace(/^\/|\/$/g,"").trim()
+};
+
+// ✅ 組出「完整版契約 HTML」（你要全部寫在 index.html，就是這裡產生）
+const contractHtml = buildContractHtml(payload, shopInfo, termsHtml, {
+  id: inserted?.id,
+  created_at: inserted?.created_at
+});
+// ✅ 先存（不管寄信成功與否，都讓 success 可開完整版）
+const baseObj = {
   id: inserted?.id || "",
   created_at: inserted?.created_at || payload.signed_at,
-  payload
-}));
+  payload,
+  contract_html: contractHtml,
+  email_sent: false,
+  email_to: (payload.owner_email || "").trim()
+};
+sessionStorage.setItem("hanamu_last_contract", JSON.stringify(baseObj));
+
+// ✅ 呼叫 Edge Function：resend-email（部署名照你指定）
+try{
+  const resp = await fetch(`${SUPABASE_URL}/functions/v1/resend-email`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "apikey": SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify({
+      to: (payload.owner_email || "").trim() || null, // 客人 email 可空
+      petNames: payload.pet_name || "毛孩",
+      subject: `【花沐寵物沙龍】契約副本 - ${payload.pet_name || "毛孩"}`,
+      html: contractHtml
+    })
+  });
+
+  const text = await resp.text();
+  let result = {};
+  try{ result = JSON.parse(text || "{}"); }catch(e){ result = {}; }
+
+  // ✅ 更新寄送狀態
+  const raw = sessionStorage.getItem("hanamu_last_contract");
+  const obj = raw ? JSON.parse(raw) : baseObj;
+  obj.email_sent = !!result?.success;
+  obj.email_to = (payload.owner_email || "").trim();
+  sessionStorage.setItem("hanamu_last_contract", JSON.stringify(obj));
+
+}catch(e){
+  console.warn("寄信失敗（不影響成功頁顯示）:", e);
+}
 
 showMsg("ok", "✅ 已提交並寫入資料庫");
 location.hash = "#success";
@@ -2006,6 +2484,19 @@ location.hash = "#success";
   submitIconLoading?.classList.add("hidden");
 }
   });
+
+  function normalizeTermsText(t){
+  return String(t || "")
+    .replace(/\r/g, "")
+    .replace(/\u00A0/g, " ")
+    // 去掉你 modal 最底部那句提示（若有抓到）
+    .replace(/---\s*請滑到最底部以啟用同意按鈕\s*---/g, "")
+    // 每行右側空白去掉
+    .split("\n").map(line => line.replace(/[ \t]+$/g, "")).join("\n")
+    // 連續 3 行以上空白 → 變 1 行空白
+    .replace(/\n\s*\n\s*\n+/g, "\n\n")
+    .trim();
+}
 </script>
 <!-- ✅ 舊客搜尋：寵物選擇彈窗（像宿洗：手機貼底、桌機置中） -->
 <div id="petSelectModal" aria-hidden="true">
