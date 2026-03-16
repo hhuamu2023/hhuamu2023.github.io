@@ -1668,6 +1668,25 @@ function closeTerms(){
 function digitsOnly(input){
   input.value = (input.value || "").replace(/[^\d]/g, "");
 }
+// ✅ 統一顯示「台灣時區」時間（Asia/Taipei）
+// input 可以是 Date 或 ISO 字串
+function formatTaipeiTime(input){
+  const d = (input instanceof Date) ? input : new Date(input);
+  if(!(d instanceof Date) || isNaN(d.getTime())) return "";
+
+  const fmt = new Intl.DateTimeFormat("zh-TW", {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  });
+
+  return fmt.format(d);
+}
 // ✅ 身分證：首字母自動轉大寫（其餘不動）
 // 例如：a123456789 → A123456789
 function ownerIdUppercaseFirst(input){
@@ -1884,8 +1903,8 @@ sigConfirmFsBtn.addEventListener("click", () => {
   // ✅ 隱藏「虛線簽名板」按鈕（讓預覽取代它）
   openSigBtn.classList.add("hidden");
 
-  // ✅ 顯示簽署時間
-  sigTime.textContent = new Date().toLocaleString("zh-TW", { hour12:false });
+  // ✅ 顯示簽署時間（台灣時區）
+  sigTime.textContent = `${formatTaipeiTime(new Date())}`;
 
   closeSigFullscreen();
 });
@@ -2163,7 +2182,7 @@ function buildContractHtml(payload, shopInfo, termsHtml, meta = {}){
 
   const contractId = meta.id || "";
   const signedAtISO = p.signed_at || meta.created_at || "";
-  const signedAt = signedAtISO ? String(signedAtISO).replace("T"," ").replace("Z","") : "";
+  const signedAt = signedAtISO ? `${formatTaipeiTime(signedAtISO)}` : "";
 
   // ✅ 晶片顯示
   const chipText =
