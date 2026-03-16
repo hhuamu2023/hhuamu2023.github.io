@@ -1,0 +1,26 @@
+{
+  "name": "花沐寵物沙龍｜數位美容契約",
+  "short_name": "花沐契約",
+  "description": "花沐寵物沙龍：美容數位契約填寫、條款閱讀與簽名提交。",
+  "id": "/",
+  "start_url": "/#home",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF7F5",
+  "theme_color": "#C48C93",
+  "icons": [
+    {
+      "src": "https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

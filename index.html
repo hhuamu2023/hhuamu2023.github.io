@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="format-detection" content="telephone=no" />
   <link rel="icon" href="https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png">
+  <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#C48C93">
   <title>花沐寵物沙龍｜數位美容契約</title>
 
   <!-- Tailwind (快速做出宿洗感的卡片與排版) -->
@@ -2529,5 +2531,78 @@ location.hash = "#success";
     <span id="toastSub" class="toast-sub"></span>
   </div>
 </div>
+<script>
+
+(function () {
+  if (!("serviceWorker" in navigator)) return;
+
+  function canAutoReloadNow() {
+    // 填表頁盡量不要自動刷新，避免使用者填到一半資料消失
+    const hash = location.hash || "#home";
+    const inGrooming = hash.includes("grooming");
+    return !inGrooming;
+  }
+
+  function toast(type, text) {
+    // 你有 showMsg 就用它；沒有也不會報錯
+    try {
+      if (typeof showMsg === "function") showMsg(type, text);
+    } catch (e) {}
+  }
+
+  window.addEventListener("load", async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js?v=1", { scope: "/" });
+
+      // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+
+      // 若一進來就已經有 waiting（代表背景已下載好新版本）
+      if (reg.waiting) {
+        if (canAutoReloadNow()) {
+          reg.waiting.postMessage({ type: "SKIP_WAITING" });
+        } else {
+          toast("ok", "✅ 偵測到新版本，建議將網頁重新整理進行更新");
+        }
+      }
+
+      // 偵測更新流程
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+
+        newWorker.addEventListener("statechange", () => {
+          // state === installed 且已有舊 controller，表示「有新版本」且已下載完成，正在 waiting
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            if (reg.waiting) {
+              if (canAutoReloadNow()) {
+                reg.waiting.postMessage({ type: "SKIP_WAITING" });
+              } else {
+                toast("ok", "✅ 偵測到新版本，建議將網頁重新整理進行更新");
+              }
+            }
+          }
+        });
+      });
+
+      // 主動定期檢查更新（30 分鐘一次）
+      setInterval(() => {
+        reg.update().catch(() => {});
+      }, 30 * 60 * 1000);
+
+      // 首次也更新一次（避免太久才更新）
+      reg.update().catch(() => {});
+
+    } catch (err) {
+      console.warn("Service Worker 註冊失敗：", err);
+    }
+  });
+})();
+</script>
 </body>
 </html>
