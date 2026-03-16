@@ -326,6 +326,130 @@ background: var(--bg);
   body{ background: #fff !important; }
   .receipt-emboss{ box-shadow:none !important; border: 1px solid #ddd !important; }
 }
+/* ✅ 舊客彈窗 */
+#petSelectModal{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;            /* ✅ 用 display 控制 */
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  /* ✅ 置中（手機/桌機都置中） */
+  align-items: center;
+  justify-content: center;
+
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  padding-top: max(1rem, env(safe-area-inset-top));
+
+  overscroll-behavior: contain;
+}
+
+#petSelectModal .pet-modal{
+  width: 100%;
+  max-width: 28rem;
+  background: #fff;
+  border-radius: 1.75rem 1.75rem 1.25rem 1.25rem;
+  border: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 22px 60px rgba(0,0,0,.18);
+  overflow: hidden;
+
+  /* 手機 bottom-sheet 高度限制 */
+  max-height: min(78dvh, 720px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 桌機：置中顯示 */
+@media (min-width: 768px){
+  #petSelectModal .pet-modal{
+    border-radius: 1.75rem;
+    max-height: 80vh;
+  }
+}
+
+#petSelectModal .pet-modal-body{
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+}
+/* ✅ 舊客帶入後：捲到服務內容時不要被 sticky header 擋住 */
+#secService{
+  scroll-margin-top: 90px;
+}
+
+/* ✅ 引導高亮（帶入後閃一下） */
+.jump-highlight{
+  animation: jumpHL 1.1s ease-out 1;
+}
+
+@keyframes jumpHL{
+  0%{
+    box-shadow: 0 0 0 0 rgba(196,140,147,.0);
+    transform: translateY(0);
+  }
+  25%{
+    box-shadow: 0 0 0 6px rgba(196,140,147,.18);
+    transform: translateY(-2px);
+  }
+  100%{
+    box-shadow: 0 0 0 0 rgba(196,140,147,.0);
+    transform: translateY(0);
+  }
+}
+/* ✅ Toast 浮動提示（固定在畫面上方，不捲動頁面） */
+#toast{
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  width: calc(100% - 24px);
+  max-width: 520px;
+  display: none;
+}
+
+.toast-card{
+  border-radius: 18px;
+  padding: 12px 14px;
+  font-weight: 900;
+  font-size: 13px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.18);
+  border: 1px solid rgba(0,0,0,.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.toast-ok{
+  background: rgba(196,140,147,.92);
+  color: #fff;
+}
+
+.toast-err{
+  background: rgba(214,125,125,.92);
+  color: #fff;
+}
+
+.toast-sub{
+  display:block;
+  font-weight: 800;
+  font-size: 11px;
+  opacity: .9;
+  margin-top: 2px;
+}
+
+@keyframes toastIn{
+  from{ opacity: 0; transform: translateY(-10px); }
+  to{ opacity: 1; transform: translateY(0px); }
+}
+.toast-anim{
+  animation: toastIn .18s ease-out;
+}
   </style>
 </head>
 
@@ -853,7 +977,6 @@ background: var(--bg);
     <span id="submitLabel">確認並提交契約</span>
   </span>
 </button>
-        <div id="formMsg" class="hidden p-4 rounded-2xl text-sm font-bold"></div>
       </section>
     </form>
 
@@ -1204,6 +1327,8 @@ async function searchOldCustomer(){
 function openPetSelectModal(records){
   const modal = document.getElementById("petSelectModal");
   const box = document.getElementById("petListContainer");
+  const closeBtn = document.getElementById("petModalCloseBtn");
+  const keepBtn = document.getElementById("petModalKeepBtn");
   if(!modal || !box) return;
 
   box.innerHTML = "";
@@ -1226,20 +1351,39 @@ function openPetSelectModal(records){
     `;
     btn.addEventListener("click", () => {
       fillFormWithPayload(r.payload || {});
-      closePetSelectModal();
+      closePetSelectModal(false);
       showMsg("ok", `✅ 已帶入「${r.pet_name}」的舊客資料`);
     });
     box.appendChild(btn);
   });
 
-  modal.classList.remove("hidden");
-  document.body.style.overflow = "hidden";
+  // ✅ 顯示彈窗 + 鎖背景（像宿洗）
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+  lockPageScroll();
+
+  // 按 X 關閉
+  if (closeBtn) closeBtn.onclick = () => closePetSelectModal(false);
+
+  // 不使用舊資料
+  if (keepBtn) keepBtn.onclick = () => closePetSelectModal(true);
+
+  // 點遮罩（modal 外）關閉
+  modal.onclick = (e) => { if (e.target === modal) closePetSelectModal(false); };
+
+  if (window.lucide) window.lucide.createIcons();
 }
 
 function closePetSelectModal(keepEditing=false){
   const modal = document.getElementById("petSelectModal");
-  if(modal) modal.classList.add("hidden");
-  document.body.style.overflow = "";
+  if(modal){
+    modal.style.display = "none";
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  // ✅ 解除鎖背景（像宿洗）
+  unlockPageScroll();
+
   if(keepEditing) showMsg("ok", "✅ 已取消帶入，可繼續填寫新表單");
 }
 
@@ -1248,51 +1392,130 @@ function fillFormWithPayload(p){
   const form = document.getElementById("contractForm");
   if(!form) return;
 
-  // 1) 一般 input/select/textarea
-  Object.entries(p).forEach(([k,v]) => {
+  // ✅ 只允許帶入：飼主＋寵物欄位
+  const ALLOW = new Set([
+    // 飼主
+    "owner_name","owner_email","owner_id","owner_phone","owner_address",
+    "emergency_name","emergency_phone","hospital",
+
+    // 寵物
+    "pet_name","pet_breed","pet_color","pet_age",
+    "chip_status","pet_chip",
+    "pet_sex","is_neutered","is_friendly","is_dog_friendly","is_aggressive",
+    "has_history","history_notes"
+  ]);
+
+  // ✅ 1) 一般 input/select/textarea：只帶入 ALLOW 內的
+  Object.entries(p || {}).forEach(([k,v]) => {
+    if(!ALLOW.has(k)) return;
+
     const el = form.querySelector(`[name="${CSS.escape(k)}"]`);
     if(!el) return;
 
-    if(el.type === "radio"){
-      // radio 另外處理
-      return;
-    }
+    // radio 下面另外處理
+    if(el.type === "radio") return;
+
     el.value = v ?? "";
   });
 
-  // 2) radio groups（逐組用 value 勾起來）
-  const radioNames = ["pet_sex","is_neutered","is_friendly","is_dog_friendly","is_aggressive","has_history","service_type"];
+  // ✅ 2) radio groups（只處理寵物相關，不包含 service_type）
+  const radioNames = [
+    "pet_sex","is_neutered","is_friendly","is_dog_friendly","is_aggressive","has_history"
+  ];
   radioNames.forEach(name=>{
-    const val = p[name];
+    const val = (p || {})[name];
     if(!val) return;
-    const r = form.querySelector(`input[type="radio"][name="${name}"][value="${CSS.escape(val)}"]`);
+    const r = form.querySelector(
+      `input[type="radio"][name="${name}"][value="${CSS.escape(val)}"]`
+    );
     if(r) r.checked = true;
   });
 
-  // 3) 晶片狀態切換（你已經有 toggleChipInput）
-  if(p.chip_status){
+  // ✅ 3) 晶片狀態切換
+  if((p || {}).chip_status){
     const sel = document.getElementById("chipStatus");
-    if(sel) sel.value = p.chip_status;
+    if(sel) sel.value = (p || {}).chip_status;
     if(typeof toggleChipInput === "function") toggleChipInput();
   }
 
-  // 4) 其他項目顯示
-  if(typeof toggleOtherServiceInput === "function") toggleOtherServiceInput();
+  // =========================================================
+  // ✅ 重點：清空「本次服務內容」相關欄位（不帶入）
+  // =========================================================
 
-  // 5) 接回時間（另行通知模式）
-  const pickup = p.pickup_time;
-  if(pickup === "另行通知接回時間"){
-    if(typeof isNotifyLater !== "undefined" && !isNotifyLater && typeof togglePickupTimeMode === "function"){
-      togglePickupTimeMode();
-    }
-  }else if(pickup){
+  // 4) 清空 service_type（radio 全取消）
+  const serviceRadios = form.querySelectorAll('input[type="radio"][name="service_type"]');
+  serviceRadios.forEach(r => r.checked = false);
+
+  // 5) 清空其他項目說明 + 隱藏區塊
+  const otherArea = document.getElementById("otherServiceInputArea");
+  const otherDesc = document.getElementById("otherServiceDesc");
+  if(otherDesc) otherDesc.value = "";
+  if(otherArea) otherArea.classList.add("hidden");
+
+  // 6) 清空接回時間（回到「非另行通知」狀態）
+  try{
     if(typeof isNotifyLater !== "undefined" && isNotifyLater && typeof togglePickupTimeMode === "function"){
-      togglePickupTimeMode();
+      togglePickupTimeMode(); // 讓它切回「時間 input」模式
     }
-    const timeEl = document.getElementById("pickupTime");
-    if(timeEl) timeEl.value = pickup;
+  }catch(e){}
+  const pickupTime = document.getElementById("pickupTime");
+  if(pickupTime) pickupTime.value = "";
+
+  // =========================================================
+  // ✅ 條款 / 簽名：重置（引導使用者重新閱讀與簽名）
+  // =========================================================
+  try{
+    // 條款狀態重置
+    if(typeof termsAgreed !== "undefined") termsAgreed = false;
+
+    const termsStatus = document.getElementById("termsStatus");
+    if(termsStatus){
+      termsStatus.textContent = "待閱讀";
+      termsStatus.className = "text-xs font-black px-3 py-1 rounded-full bg-gray-100 text-gray-500";
+    }
+
+    // 重新鎖住簽名按鈕
+    if(typeof refreshSigLock === "function") refreshSigLock();
+  }catch(e){}
+
+  try{
+    // 簽名重置
+    if(typeof sigDataURL !== "undefined") sigDataURL = "";
+
+    const sigPreviewWrap = document.getElementById("sigPreviewWrap");
+    const clearSigBtn = document.getElementById("clearSigBtn");
+    const openSigBtn = document.getElementById("openSigBtn");
+    const sigTime = document.getElementById("sigTime");
+
+    if(sigPreviewWrap) sigPreviewWrap.classList.add("hidden");
+    if(clearSigBtn) clearSigBtn.classList.add("hidden");
+    if(openSigBtn) openSigBtn.classList.remove("hidden");
+    if(sigTime) sigTime.textContent = "";
+  }catch(e){}
+
+  // =========================================================
+  // ✅ 最後：跳到「本次服務內容」引導填寫
+  // =========================================================
+  const sec = document.getElementById("secService");
+  if(sec){
+    // 先捲動
+    sec.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    // 加高亮動畫
+    sec.classList.remove("jump-highlight");
+    setTimeout(()=>{
+      sec.classList.add("jump-highlight");
+      setTimeout(()=>sec.classList.remove("jump-highlight"), 1200);
+    }, 120);
   }
+
+  // 小提醒：把游標導到第一個服務選項（可選）
+  setTimeout(()=>{
+    const first = form.querySelector('input[type="radio"][name="service_type"]');
+    first?.focus?.();
+  }, 400);
 }
+
 // ====== 簡易路由：#home / #grooming / #success ======
 const viewHome = document.getElementById("view-home");
 const viewGrooming = document.getElementById("view-grooming");
@@ -1630,18 +1853,30 @@ clearSigBtn.addEventListener("click", () => {
   // ====== 表單送出（簡易驗證：必填 + 條款 + 簽名） ======
   const form = document.getElementById("contractForm");
   const submitBtn = document.getElementById("submitBtn");
-  const formMsg = document.getElementById("formMsg");
 
-  function showMsg(type, text){
-    formMsg.classList.remove("hidden");
-    if(type === "ok"){
-      formMsg.className = "p-4 rounded-2xl text-sm font-bold bg-hanamu-green/10 text-hanamu-green border border-hanamu-green/20";
-    }else{
-      formMsg.className = "p-4 rounded-2xl text-sm font-bold bg-red-50 text-hanamu-red border border-red-200";
-    }
-    formMsg.textContent = text;
-    formMsg.scrollIntoView({ behavior:"smooth", block:"center" });
-  }
+let __toastTimer = null;
+
+function showMsg(type, text){
+  const toast = document.getElementById("toast");
+  const toastCard = document.getElementById("toastCard");
+  const toastText = document.getElementById("toastText");
+  const toastSub = document.getElementById("toastSub");
+
+  if(!toast || !toastCard || !toastText || !toastSub) return;
+
+  toast.style.display = "block";
+  toastCard.classList.remove("toast-ok","toast-err","toast-anim");
+  toastCard.classList.add(type === "ok" ? "toast-ok" : "toast-err");
+  toastCard.classList.add("toast-anim");
+
+  toastText.textContent = text || "";
+  toastSub.textContent = (type === "ok")
+    ? "提示：請繼續完成本次服務內容、條款閱讀與簽名"
+    : "請檢查欄位後再試一次";
+
+  if(__toastTimer) clearTimeout(__toastTimer);
+  __toastTimer = setTimeout(()=>{ toast.style.display = "none"; }, 2200);
+}
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -1739,24 +1974,35 @@ location.hash = "#success";
 }
   });
 </script>
-<!-- ✅ 舊客搜尋：寵物選擇彈窗 -->
-<div id="petSelectModal" class="fixed inset-0 z-[9999] hidden bg-black/30 flex items-center justify-center p-4">
-  <div class="w-full max-w-md bg-white rounded-3xl border border-hanamu-green/10 shadow-2xl overflow-hidden">
-    <div class="p-5 border-b border-gray-100 flex items-center justify-between">
-      <div class="font-black text-hanamu-dark">搜尋到舊客紀錄</div>
-      <button type="button" onclick="closePetSelectModal()"
-              class="px-3 py-1 rounded-full bg-gray-100 text-gray-600 font-black">關閉</button>
+<!-- ✅ 舊客搜尋：寵物選擇彈窗（像宿洗：手機貼底、桌機置中） -->
+<div id="petSelectModal" aria-hidden="true">
+  <div class="pet-modal">
+    <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-white">
+      <div>
+        <div class="font-black text-hanamu-dark">搜尋到舊客紀錄</div>
+        <div class="text-[11px] font-bold text-gray-400 mt-0.5">請選擇要帶入的毛孩資料</div>
+      </div>
+      <button type="button" id="petModalCloseBtn"
+              class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 font-black flex items-center justify-center">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
     </div>
 
-    <div class="p-5">
-      <div class="text-xs font-bold text-gray-500 mb-3">請選擇要帶入的毛孩資料：</div>
+    <div class="pet-modal-body p-5">
       <div id="petListContainer" class="space-y-3 max-h-[55vh] overflow-auto pr-1"></div>
 
-      <button type="button" onclick="closePetSelectModal(true)"
+      <button type="button" id="petModalKeepBtn"
               class="mt-4 w-full py-3 rounded-2xl border-2 border-gray-200 font-black text-gray-600 hover:bg-gray-50 transition">
         不使用舊資料，繼續填寫
       </button>
     </div>
+  </div>
+</div>
+<!-- ✅ Toast：浮動提示（showMsg 會用這個） -->
+<div id="toast">
+  <div id="toastCard" class="toast-card toast-ok">
+    <span id="toastText"></span>
+    <span id="toastSub" class="toast-sub"></span>
   </div>
 </div>
 </body>
