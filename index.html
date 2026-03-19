@@ -1161,7 +1161,7 @@ background: var(--bg);
         <li>輕微受傷處置：因不可抗力導致小於1公分之淺表傷口，工作室將消毒清潔。飼主回後24小時內無異議視同接受。</li>
         <li>意外事故與賠償標準：</li>
         <li>若因工作室重大疏失導致受傷或往生，經保險審核未理賠時，依以下標準補償：</li>
-        <li>受傷醫療上限 $2,000 意外往生慰撫金上限 $5,000</li>
+        <li>受傷醫療上限 $2,000<br />意外往生慰撫金上限 $5,000</li>
         <li>超過上述金額部分，不另負擔賠償責任。</li>
         <li>緊急就醫：突發狀況無法即時聯絡時，授權店家送醫處置，費用由飼主負擔。</li>
         <li>若非店家疏失（如隱瞞病情），不負賠償責任。</li>
@@ -2030,213 +2030,16 @@ function buildTermsHtmlFromModal(){
   const root = document.getElementById("termsBody");
   if(!root) return "<div>（無條款內容）</div>";
 
-  // ===== helpers (email-safe spacing / table layout) =====
-  const spacer = (h) => `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-      <tr><td height="${h}" style="height:${h}px;line-height:${h}px;font-size:0;">&nbsp;</td></tr>
-    </table>
-  `;
+  // 取出所有「白色卡片」(標題卡 + 條款卡)
+  const cards = root.querySelectorAll(".bg-white.rounded-2xl.border");
+  let html = "";
 
-  const oneLine = (t) => {
-    return String(t ?? "")
-      .replace(/\r/g, "")
-      .replace(/\u00A0/g, " ")
-      .split("\n")
-      .map(s => s.trim())
-      .filter(Boolean)
-      .join(" ")
-      .replace(/[ \t]{2,}/g, " ")
-      .trim();
-  };
-
-  const cleanBulletText = (t) => {
-    // 去掉前面可能出現的符號（• ● - 等）
-    return oneLine(t).replace(/^[•●\-—–\s]+/g, "").trim();
-  };
-
-  const dotTable = (lines, dotColor, textColor) => {
-    if(!lines || lines.length === 0) return "";
-    return `
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;">
-        ${lines.map(t => `
-          <tr>
-            <td width="16" style="width:16px;vertical-align:top;padding-top:9px;">
-              <span style="display:inline-block;width:8px;height:8px;background:${dotColor};border-radius:999px;line-height:8px;font-size:8px;">&nbsp;</span>
-            </td>
-            <td style="vertical-align:top;padding:6px 0;color:${textColor};font-size:13px;line-height:1.75;font-weight:700;">
-              ${pillify(t)}
-            </td>
-          </tr>
-        `).join("")}
-      </table>
-    `;
-  };
-
-  const sectionCard = (title, innerHtml, tone = "plain") => {
-    const bg = (tone === "tint") ? "rgba(196,140,147,.06)" : "#ffffff";
-    const border = (tone === "tint") ? "rgba(196,140,147,.18)" : "rgba(155,122,94,.14)";
-    return `
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;border-spacing:0;">
-        <tr>
-          <td style="border:1px solid ${border};background:${bg};border-radius:14px;padding:12px;">
-            <div style="font-weight:900;color:#9B7A5E;font-size:13px;margin:0 0 8px;">${escapeHtml(title)}</div>
-            ${innerHtml}
-          </td>
-        </tr>
-      </table>
-    `;
-  };
-
-  const clauseMiniCard = (title, body, index) => {
-    const safeTitle = escapeHtml(title || `條款 ${index+1}`);
-    const safeBody = pillify(body || "—");
-
-    // 小卡：用 table 包，email/Outlook 相對穩
-    return `
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;border-spacing:0;">
-        <tr>
-          <td style="border:1px solid rgba(155,122,94,.14);background:#ffffff;border-radius:14px;">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;border-spacing:0;">
-              <tr>
-                <td style="padding:10px 12px;background:rgba(196,140,147,.08);border-bottom:1px solid rgba(196,140,147,.18);
-                           border-radius:14px 14px 0 0;">
-                  <div style="font-weight:900;color:#111827;font-size:13px;line-height:1.4;">
-                    ${safeTitle}
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding:10px 12px;color:#374151;font-size:13px;line-height:1.75;font-weight:700;">
-                  ${safeBody}
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    `;
-  };
-
-    // ===== red pill keywords (你要紅底標籤的關鍵字) =====
-  const HIGHLIGHT_WORDS = [
-    "不涉及醫療行為",
-    "逾時2小時另加收安親費100/時",
-    "乙方不負責損害賠償責任",
-    "全部損失",
-    "加收安親費",
-    "視同住宿一晚計費"
-  ];
-
-  // 把文字先 escape，再把關鍵字換成紅底膠囊（email-safe）
-  const pillify = (text) => {
-    let html = escapeHtml(text || "");
-    HIGHLIGHT_WORDS.forEach(w => {
-      const ew = escapeHtml(w || "");
-      if(!ew) return;
-      html = html.split(ew).join(
-        `<span style="display:inline-block;padding:2px 8px;border-radius:999px;` +
-        `background:#FEF2F2;border:1px solid #FECACA;color:#B91C1C;` +
-        `font-weight:900;line-height:1.4;">${ew}</span>`
-      );
-    });
-    return html;
-  };
-
-  // ===== 1) 找到「重點提醒」區塊 =====
-  const reminderTitleEl = [...root.querySelectorAll("div.font-black")].find(el =>
-    (el.textContent || "").trim() === "重點提醒"
-  );
-  const reminderBox = reminderTitleEl ? reminderTitleEl.parentElement : null;
-
-  const reminders = reminderBox
-    ? [...reminderBox.querySelectorAll("li")]
-        .map(li => {
-          // 你的 li 前面有一個 span 圓點，text 會混在一起，這裡做清潔
-          const raw = (li.innerText || li.textContent || "").trim();
-          return cleanBulletText(raw);
-        })
-        .filter(Boolean)
-    : [];
-
-  // ===== 2) 找到「條款內容」區塊（ol/li）=====
-  const clausesTitleEl = [...root.querySelectorAll("div.font-black")].find(el =>
-    (el.textContent || "").trim() === "條款內容"
-  );
-  const clausesBox = clausesTitleEl ? clausesTitleEl.parentElement : null;
-
-  const ol = (clausesBox && clausesBox.querySelector("ol")) ? clausesBox.querySelector("ol") : root.querySelector("ol");
-  const clauseLis = ol ? [...ol.querySelectorAll(":scope > li")] : [];
-
-  const clauses = clauseLis.map((li) => {
-    // title: 取 span.font-black
-    const title = (li.querySelector("span.font-black")?.innerText || li.querySelector("span.font-black")?.textContent || "").trim();
-
-    // body: 取整段 innerText，扣掉 title，並壓成一行（避免 email 空白怪）
-    const full = (li.innerText || li.textContent || "").trim();
-    let body = full;
-
-    if(title){
-      body = body.replace(title, "").trim();
-    }
-    body = body.replace(/^[\s:：\-—–]+/g, "").trim();
-    body = oneLine(body);
-
-    return {
-      title: title || "（未命名條款）",
-      body: body || "—"
-    };
+  cards.forEach(card => {
+    html += card.outerHTML;
   });
 
-  // ===== 3) 找到底部補充（虛線那塊）=====
-  const footBox = [...root.querySelectorAll("div")].find(el =>
-    (el.className || "").includes("border-t") &&
-    ((el.innerText || el.textContent || "").includes("經甲乙雙方") || (el.innerText || el.textContent || "").includes("本人已確認"))
-  );
-
-  let footLines = [];
-  if(footBox){
-    footLines = String(footBox.innerText || footBox.textContent || "")
-      .replace(/\r/g, "")
-      .split("\n")
-      .map(s => cleanBulletText(s))
-      .filter(Boolean);
-  }
-
-  // ===== 4) 組 HTML：重點提醒(卡) + 條款(每條小卡) + 補充(卡) =====
-  const reminderHtml = reminders.length
-    ? sectionCard(
-        "重點提醒",
-        dotTable(reminders, "#C48C93", "#374151"),
-        "tint"
-      )
-    : "";
-
-  // ✅ 只輸出「每條條款小卡」，不再外面包一層「條款內容大卡」
-  const clauseCardsHtml = clauses.length
-    ? clauses.map((c, idx) => `
-        ${clauseMiniCard(c.title, c.body, idx)}
-        ${spacer(10)}
-      `).join("")
-    : `<div style="color:#6b7280;font-size:13px;font-weight:800;">（無條款內容）</div>`;
-
-  const footHtml = footLines.length
-    ? sectionCard(
-        "補充說明",
-        dotTable(footLines, "rgba(155,122,94,.55)", "#6b7280"),
-        "plain"
-      )
-    : "";
-
-  // ✅ 不再回傳外層大卡 out，直接回傳內容（減少卡片層數）
-  return `
-    ${reminderHtml ? reminderHtml + spacer(12) : ""}
-    ${clauseCardsHtml}
-    ${footHtml ? spacer(12) + footHtml : ""}
-  `;
-
-  return out;
+  return html || root.innerHTML;
 }
-
 // ✅ 你要「HTML 全寫在 index.html」就在這裡組版
 function buildContractHtml(payload, shopInfo, termsHtml, meta = {}){
   const p = payload || {};
@@ -2649,7 +2452,7 @@ location.hash = "#success";
 
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("/sw.js?v=3", { scope: "/" });
+      const reg = await navigator.serviceWorker.register("/sw.js?v=4", { scope: "/" });
 
       // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
       let refreshing = false;
