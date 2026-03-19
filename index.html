@@ -1119,69 +1119,111 @@ background: var(--bg);
     </p>
   </div>
 
-  <!-- 條款內容 -->
-  <div class="bg-white rounded-2xl border border-hanamu-wood/10 p-4 space-y-4">
-    <div class="font-black text-hanamu-wood">條款內容</div>
+<!-- 條款內容（優化重點標示版） -->
+<div class="bg-white rounded-2xl border border-hanamu-wood/10 p-4 space-y-4">
 
-    <ol class="space-y-3 text-gray-700 list-decimal pl-5">
-      <li>第一條(契約目的)：本服務為犬貓美容，<span class="text-hanamu-red font-black">不涉及醫療行為</span>。</li>
-      <li>第五條(健康告知)：甲方應誠實告知寵物病史與是否具有攻擊性。若因隱瞞導致意外，乙方不負責損害賠償責任；因隱瞞導致乙方人員傷亡、財損等損失，乙方將全額向甲方求償。</li>
-      <li>第六條（潛在風險認知）：服務期間或返家七日內發生之疾病，本工作室不負相關責任。</li>
-      <li>第九條(退費規定)：包月服務終止時，預收總額扣除(已使用次數 X 單次原價)後退費。</li>
-      <li>第十二條(逾時接回)：若於約定時間內未領回，收到通知<span class="text-hanamu-red font-black">逾時2小時另加收安親費100/時</span>；如經通知三日內未領回，將依照動保法第29條移交主管機關。</li>
-      <li>第十五條(履約保障)：預收費用累積金額新台幣一萬元以下，依法免提供履約保障。</li>
-      <li>其餘細節將依照行政院農委會定型化契約範本辦理。因本契約所產生之訴訟，雙方合意將以台南地方法院為第一審管轄法院。</li>
-    </ol>
-
-    <!-- 二、服務項目與收費 -->
-    <div class="pt-3 border-t border-dashed border-hanamu-wood/10">
-      <div class="font-black text-hanamu-wood">二、服務項目與收費</div>
-      <ol class="mt-2 space-y-2 text-gray-700 list-decimal pl-5">
-        <li>收費依體型毛量現場報價。若發現跳蚤壁蝨，將收取環境清潔費 $500起。打結與廢毛處理費另計（拆結 $200起、廢毛 $100起）。</li>
-        <li>美容服務完成後恕不接受異議、退款，費用須於當日支付完成。</li>
-        <li>若過程情緒過於緊張或有攻擊行為，將立即終止服務且不予收費。</li>
-      </ol>
-    </div>
-
-    <!-- 三、健康與接待規定 -->
-    <div class="pt-3 border-t border-dashed border-hanamu-wood/10">
-      <div class="font-black text-hanamu-wood">三、健康與接待規定</div>
-      <div class="mt-2 text-gray-700 font-bold">我們無法接待：</div>
-      <ul class="mt-2 space-y-1 text-gray-700 list-disc pl-5">
-        <li>未滿3個月、未打完三劑疫苗、接種疫苗一周內之幼犬貓。</li>
-        <li>身上有活體寄生蟲。</li>
-        <li>患有心臟病、癲癇、傳染病、嚴重呼吸道或腎臟疾病。（現場評估狀況為主）</li>
-      </ul>
-    </div>
-
-    <!-- 四、其他條款 -->
-    <div class="pt-3 border-t border-dashed border-hanamu-wood/10">
-      <div class="font-black text-hanamu-wood">四、其他條款</div>
-      <ol class="mt-2 space-y-2 text-gray-700 list-decimal pl-5">
-        <li>輕微受傷處置：因不可抗力導致小於1公分之淺表傷口，工作室將消毒清潔。飼主回後24小時內無異議視同接受。</li>
-        <li>意外事故與賠償標準：</li>
-        <li>若因工作室重大疏失導致受傷或往生，經保險審核未理賠時，依以下標準補償：</li>
-        <li>受傷醫療上限 $2,000<br />意外往生慰撫金上限 $5,000</li>
-        <li>超過上述金額部分，不另負擔賠償責任。</li>
-        <li>緊急就醫：突發狀況無法即時聯絡時，授權店家送醫處置，費用由飼主負擔。</li>
-        <li>若非店家疏失（如隱瞞病情），不負賠償責任。</li>
-        <li>本工作室非動物醫院，不提供醫療行為。逾三日未接回依動保法通報。</li>
-      </ol>
-    </div>
-
-    <!-- 底部同意條款 -->
-    <div class="pt-3 border-t border-dashed border-gray-200 text-[12px] text-gray-700 space-y-2">
-      <div class="flex gap-2">
-        <span class="mt-[2px] w-2 h-2 rounded-full bg-gray-500 shrink-0"></span>
-        經甲乙雙方合意約定，由甲方即時閱覽理解本契約內容並簽署。
-      </div>
-      <div class="flex gap-2">
-        <span class="mt-[2px] w-2 h-2 rounded-full bg-gray-500 shrink-0"></span>
-        本人已確認預計接回時間與服務金額無誤，並同意上述條款。
-      </div>
-    </div>
+  <!-- ✅ 重點摘要 -->
+  <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-2">
+    <div class="font-black text-hanamu-red">重點提醒（請務必注意）</div>
+    <ul class="text-[12px] font-bold text-gray-700 list-disc pl-5 space-y-1">
+      <li><span class="text-hanamu-red font-black">隱瞞病史/攻擊性 → 由飼主全責</span></li>
+      <li><span class="text-hanamu-red font-black">逾時 2 小時：$100/小時</span></li>
+      <li><span class="text-hanamu-red font-black">包月終止：依使用次數扣除後退費</span></li>
+      <li><span class="text-hanamu-red font-black">本服務不提供醫療行為</span></li>
+    </ul>
   </div>
 
+  <div class="font-black text-hanamu-wood">條款內容</div>
+
+  <ol class="space-y-3 text-gray-700 list-decimal pl-5">
+    <li>
+      第一條(契約目的)：本服務為犬貓美容，
+      <span class="text-hanamu-red font-black">不涉及醫療行為</span>。
+    </li>
+    <li>
+      第五條(健康告知)：甲方應誠實告知寵物病史與是否具有攻擊性。
+      若因隱瞞導致意外，乙方不負責損害賠償責任；
+      <span class="text-hanamu-red font-black">因隱瞞導致乙方人員傷亡、財損等損失，乙方將全額向甲方求償</span>。
+    </li>
+    <li>
+      第六條（潛在風險認知）：
+      <span class="text-hanamu-red font-black">服務期間或返家七日內發生之疾病，本工作室不負相關責任</span>。
+    </li>
+    <li>
+      第九條(退費規定)：包月服務終止時，
+      <span class="text-hanamu-red font-black">預收總額扣除(已使用次數 X 單次原價)後退費</span>。
+    </li>
+    <li>
+      第十二條(逾時接回)：若於約定時間內未領回，收到通知
+      <span class="text-hanamu-red font-black">逾時2小時另加收安親費100/時</span>；
+      如經通知三日內未領回，將依照動保法第29條移交主管機關。
+    </li>
+    <li>
+      第十五條(履約保障)：預收費用累積金額新台幣一萬元以下，依法免提供履約保障。
+    </li>
+    <li>
+      其餘細節將依照行政院農委會定型化契約範本辦理。
+      因本契約所產生之訴訟，雙方合意將以台南地方法院為第一審管轄法院。
+    </li>
+  </ol>
+
+  <!-- 二、服務項目與收費 -->
+  <div class="pt-3 border-t border-dashed border-hanamu-wood/10">
+    <div class="font-black text-hanamu-wood">二、服務項目與收費</div>
+    <ol class="mt-2 space-y-2 text-gray-700 list-decimal pl-5">
+      <li>
+        收費依體型毛量現場報價。若發現跳蚤壁蝨，
+        <span class="text-hanamu-red font-black">將收取環境清潔費 $500起</span>。
+        打結與廢毛處理費另計（拆結 $200起、廢毛 $100起）。
+      </li>
+      <li>
+        美容服務完成後恕不接受異議、退款，費用須於當日支付完成。
+      </li>
+      <li>
+        若過程情緒過於緊張或有攻擊行為，
+        <span class="text-hanamu-red font-black">將立即終止服務且不予收費</span>。
+      </li>
+    </ol>
+  </div>
+
+  <!-- 三、健康與接待規定 -->
+  <div class="pt-3 border-t border-dashed border-hanamu-wood/10">
+    <div class="font-black text-hanamu-wood">三、健康與接待規定</div>
+    <div class="mt-2 text-gray-700 font-bold">我們無法接待：</div>
+    <ul class="mt-2 space-y-1 text-gray-700 list-disc pl-5">
+      <li>未滿3個月、未打完三劑疫苗、接種疫苗一周內之幼犬貓。</li>
+      <li>身上有活體寄生蟲。</li>
+      <li>患有心臟病、癲癇、傳染病、嚴重呼吸道或腎臟疾病。（現場評估狀況為主）</li>
+    </ul>
+  </div>
+
+  <!-- 四、其他條款 -->
+  <div class="pt-3 border-t border-dashed border-hanamu-wood/10">
+    <div class="font-black text-hanamu-wood">四、其他條款</div>
+    <ol class="mt-2 space-y-2 text-gray-700 list-decimal pl-5">
+      <li>輕微受傷處置：因不可抗力導致小於1公分之淺表傷口，工作室將消毒清潔。飼主回後24小時內無異議視同接受。</li>
+      <li>意外事故與賠償標準：</li>
+      <li>若因工作室重大疏失導致受傷或往生，經保險審核未理賠時，依以下標準補償：</li>
+      <li><span class="text-hanamu-red font-black">受傷醫療上限 $2,000 / 意外往生慰撫金上限 $5,000</span></li>
+      <li>超過上述金額部分，不另負擔賠償責任。</li>
+      <li>緊急就醫：突發狀況無法即時聯絡時，授權店家送醫處置，費用由飼主負擔。</li>
+      <li>若非店家疏失（如隱瞞病情），不負賠償責任。</li>
+      <li>本工作室非動物醫院，不提供醫療行為。逾三日未接回依動保法通報。</li>
+    </ol>
+  </div>
+
+  <!-- 底部同意條款 -->
+  <div class="pt-3 border-t border-dashed border-gray-200 text-[12px] text-gray-700 space-y-2">
+    <div class="flex gap-2">
+      <span class="mt-[2px] w-2 h-2 rounded-full bg-gray-500 shrink-0"></span>
+      經甲乙雙方合意約定，由甲方即時閱覽理解本契約內容並簽署。
+    </div>
+    <div class="flex gap-2">
+      <span class="mt-[2px] w-2 h-2 rounded-full bg-gray-500 shrink-0"></span>
+      本人已確認預計接回時間與服務金額無誤，並同意上述條款。
+    </div>
+  </div>
+</div>
   <div class="h-20"></div>
   <div class="text-center text-[11px] font-black text-gray-400">
     --- 請滑到最底部以啟用同意按鈕 ---
