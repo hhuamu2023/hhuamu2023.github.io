@@ -837,6 +837,14 @@ background: var(--bg);
       <span class="ml-auto text-[11px] font-bold text-gray-400">請填寫說明</span>
     </label>
 
+    <!-- ✅ 其他項目說明（移到其他項目下方） -->
+    <div id="otherServiceInputArea" class="hidden sm:col-span-2">
+      <label class="text-sm font-black text-hanamu-wood">其他項目說明</label>
+      <input name="other_service_desc" id="otherServiceDesc"
+             class="mt-2 w-full cute-input px-4 py-3"
+             placeholder="請說明服務內容（例如：剪指甲、清耳朵...）" />
+    </div>
+
   </div>
 
     <!-- 升級加購項目（可複選） -->
@@ -890,9 +898,6 @@ background: var(--bg);
     </div>
   </div>
 
-  <div id="otherServiceInputArea" class="hidden">
-    <label class="text-sm font-black text-hanamu-wood">其他項目說明</label>
-    <input name="other_service_desc" id="otherServiceDesc" class="mt-2 w-full cute-input px-4 py-3" placeholder="請說明服務內容（例如：剪指甲、清耳朵...）" />
   </div>
 
   <!-- 接回時間 -->
