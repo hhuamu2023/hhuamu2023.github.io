@@ -1203,9 +1203,11 @@ background: var(--bg);
     <ol class="mt-2 space-y-2 text-gray-700 list-decimal pl-5">
       <li>輕微受傷處置：因不可抗力導致小於1公分之淺表傷口，工作室將消毒清潔。飼主回後24小時內無異議視同接受。</li>
       <li>意外事故與賠償標準：</li>
-      <li>若因工作室重大疏失導致受傷或往生，經保險審核未理賠時，依以下標準補償：</li>
-      <li><span class="text-hanamu-red font-black">受傷醫療上限 $2,000 / 意外往生慰撫金上限 $5,000</span></li>
-      <li>超過上述金額部分，不另負擔賠償責任。</li>
+<li>
+  若因工作室重大疏失導致受傷或往生，經保險審核未理賠時，依以下標準補償：<br>
+  <span class="text-hanamu-red font-black">受傷醫療上限 $2,000 / 意外往生慰撫金上限 $5,000</span><br>
+  超過上述金額部分，不另負擔賠償責任。
+</li>
       <li>緊急就醫：突發狀況無法即時聯絡時，授權店家送醫處置，費用由飼主負擔。</li>
       <li>若非店家疏失（如隱瞞病情），不負賠償責任。</li>
       <li>本工作室非動物醫院，不提供醫療行為。逾三日未接回依動保法通報。</li>
@@ -2494,7 +2496,7 @@ location.hash = "#success";
 
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("/sw.js?v=4", { scope: "/" });
+      const reg = await navigator.serviceWorker.register("/sw.js?v=5", { scope: "/" });
 
       // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
       let refreshing = false;
