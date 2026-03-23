@@ -440,11 +440,12 @@ background: var(--bg);
     <div class="glass-card p-7 md:p-10 text-center relative overflow-hidden">
       <div class="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-hanamu-accent/15 blur-2xl"></div>
 
-      <img
-        src="https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png"
-        alt="花沐寵物沙龍"
-        class="w-32 md:w-40 mx-auto drop-shadow-sm"
-      />
+<img
+  id="heroLogo"
+  src="https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png"
+  alt="花沐寵物沙龍"
+  class="w-32 md:w-40 mx-auto drop-shadow-sm cursor-pointer"
+/>
 
       <h1 class="mt-6 text-2xl md:text-3xl font-black text-hanamu-dark tracking-tight">
         花沐寵物沙龍
@@ -1747,7 +1748,27 @@ function closeTerms(){
   // ✅ 解除鎖頁
   unlockPageScroll();
 }
+// ✅ HERO Logo 雙擊 / 連點兩下跳 Admin（支援手機 + PWA）
+(function(){
+  const logo = document.getElementById("heroLogo");
+  if(!logo) return;
 
+  let lastTap = 0;
+
+  // 桌機雙擊
+  logo.addEventListener("dblclick", () => {
+    location.href = "/admin.html";
+  });
+
+  // 手機雙點
+  logo.addEventListener("touchend", () => {
+    const now = Date.now();
+    if (now - lastTap < 350) {
+      location.href = "/admin.html";
+    }
+    lastTap = now;
+  });
+})();
   openTermsBtn.addEventListener("click", openTerms);
   closeTermsBtn.addEventListener("click", closeTerms);
   termsBackdrop.addEventListener("click", (e)=>{ if(e.target === termsBackdrop) closeTerms(); });
@@ -2231,7 +2252,7 @@ function buildContractHtml(payload, shopInfo, termsHtml, meta = {}){
 
       <div style="margin-top:10px;background:rgba(196,140,147,.06);border:1px solid rgba(196,140,147,.18);
                   border-radius:14px;padding:10px;font-size:12px;line-height:1.7;color:#111827;font-weight:800;">
-        逾時 2 小時以上，將酌收 $150/小時 逾時費。
+        逾時 2 小時以上，將酌收 $100/小時 逾時費。
       </div>
 
       <hr style="border:none;border-top:1px dashed rgba(196,140,147,.35);margin:14px 0;"/>
@@ -2365,7 +2386,7 @@ const shopInfo = {
   owner: (document.getElementById("shop_owner")?.textContent || "").trim(),
   phone: (document.getElementById("shop_phone")?.textContent || "").trim(),
   address: (document.getElementById("shop_address")?.textContent || "").trim(),
-  hours: ((document.getElementById("shop_hours")?.textContent || "").trim() + " " + (document.getElementById("shop_holiday")?.textContent || "").trim()).trim(),
+  hours: (document.getElementById("shop_hours")?.textContent || "").trim(),
   holiday: (document.getElementById("shop_holiday")?.textContent || "").trim(),
   er: ((document.getElementById("shop_er_name")?.textContent || "").trim() + "／" + (document.getElementById("shop_er_address")?.textContent || "").trim()).replace(/^\/|\/$/g,"").trim()
 };
@@ -2496,7 +2517,7 @@ location.hash = "#success";
 
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("/sw.js?v=5", { scope: "/" });
+      const reg = await navigator.serviceWorker.register("/sw.js?v=6", { scope: "/" });
 
       // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
       let refreshing = false;
@@ -2514,7 +2535,7 @@ location.hash = "#success";
           toast(
   "ok",
   "✅ 偵測到新版本",
-  "更新提醒：建議完成目前操作後，將此頁重新整理以套用最新版本"
+  "建議將此頁重新整理以套用最新版本"
 );
         }
       }
@@ -2534,7 +2555,7 @@ location.hash = "#success";
                 toast(
   "ok",
   "✅ 偵測到新版本",
-  "更新提醒：建議完成目前操作後，將此頁重新整理以套用最新版本"
+  "建議將此頁重新整理以套用最新版本"
 );
               }
             }
