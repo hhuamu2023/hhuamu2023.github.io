@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+  <title>花沐寵物沙龍｜後台管理</title>
+<link rel="manifest" href="/manifest-admin.json">
+  <link rel="icon" href="https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png">
+  <meta name="theme-color" content="#FFF7F5" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            hanamu: {
+              green: "#C48C93",
+              wood: "#9B7A5E",
+              bg: "#FFF7F5",
+              dark: "#2B2B2B",
+              accent: "#E8C66A",
+              red: "#D67D7D"
+            }
+          },
+          fontFamily: {
+            cute: ['"Zen Maru Gothic"', 'sans-serif']
+          },
+          boxShadow: {
+            soft: '0 8px 20px rgba(196,140,147,.12)'
+          },
+          borderRadius: { cute: '1.6rem' }
+        }
+      }
+    };
+  </script>
+
+<style>
+  :root{ --bg:#FFF7F5; --card:#FFFFFF; --text:#2B2B2B; --shadow:0 18px 40px rgba(196,140,147,.15); }
+  body{
+    font-family:"Zen Maru Gothic",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* 卡片風格 */
+  .card{
+    background:#fff;
+    border:1px solid rgba(196,140,147,.15);
+    border-radius:1.6rem;
+    box-shadow: var(--shadow);
+  }
+
+  .soft-card{
+    background:#FFFDF9;
+    border:1px solid rgba(196,140,147,.08);
+    border-radius:1.4rem;
+    box-shadow:0 8px 18px rgba(196,140,147,.10);
+  }
+
+  .btn{ transition:.2s ease; font-weight:900; }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn:active{ transform:scale(.97); }
+
+  .badge{ padding:4px 10px; border-radius:999px; font-size:11px; font-weight:900; }
+  .b-pending{background:#FEF3C7;color:#B45309;}
+  .b-confirmed{background:#D1FAE5;color:#047857;}
+  .b-completed{background:#E5E7EB;color:#374151;}
+  .b-cancelled{background:#FEE2E2;color:#B91C1C;}
+
+  .section-title{
+    font-size:13px;
+    font-weight:900;
+    color:#9B7A5E;
+    margin-bottom:6px;
+  }
+
+  .kv{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    font-weight:700;
+    padding:4px 0;
+    border-bottom:1px dashed rgba(0,0,0,.06);
+  }
+  .kv span:first-child{ color:#9B7A5E; font-weight:800; }
+  /* ====== 首頁區塊美化 ====== */
+.hero-wrap{
+  background:linear-gradient(180deg,#fff, #fff5f4);
+  border:1px solid rgba(196,140,147,.18);
+  border-radius:24px;
+  padding:18px;
+  box-shadow:0 16px 40px rgba(196,140,147,.15);
+}
+
+.search-box{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 16px;
+  background:#fff;
+  border-radius:20px;
+  border:1px solid rgba(196,140,147,.2);
+  box-shadow:0 8px 16px rgba(196,140,147,.08);
+}
+.search-box input{
+  flex:1;
+  border:none;
+  outline:none;
+  font-size:14px;
+  font-weight:800;
+  color:#2B2B2B;
+}
+
+.tabs-wrap{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.tab-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:12px;
+  border-radius:18px;
+  font-size:13px;
+  font-weight:900;
+  border:1px solid rgba(196,140,147,.18);
+  background:#fff;
+  color:#9B7A5E;
+  box-shadow:0 6px 16px rgba(196,140,147,.08);
+  transition:all .2s ease;
+}
+.tab-btn.active{
+  background:#C48C93;
+  color:white;
+  border-color:#C48C93;
+  box-shadow:0 12px 24px rgba(196,140,147,.25);
+}
+
+.stats-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:12px;
+  font-weight:900;
+  color:#9B7A5E;
+}
+.stats-row .count{
+  color:#C48C93;
+}
+/* 狀態按鈕選中效果 */
+.statusBtn.active{
+  background:#C48C93 !important;
+  color:#fff !important;
+  border-color:#C48C93 !important;
+  box-shadow:0 6px 16px rgba(196,140,147,.25);
+}
+</style>
+</head>
+
+<body>
+
+<header id="topBar" class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-hanamu-green/20 hidden">
+  <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-hanamu-green/10 flex items-center justify-center overflow-hidden">
+        <img src="https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png" class="w-8 h-8 object-contain" />
+      </div>
+      <div>
+        <div class="font-black text-hanamu-dark tracking-wide">花沐寵物沙龍</div>
+        <div class="text-[10px] font-bold text-hanamu-wood">後台管理</div>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button id="btnChangePwd" class="btn px-4 py-2 bg-hanamu-green text-white rounded-full text-xs font-black shadow-md hidden">
+        修改密碼
+      </button>
+      <button id="btnSignOut" class="btn px-4 py-2 bg-white border border-hanamu-green/30 text-hanamu-green rounded-full text-xs font-black hidden">
+        登出
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 py-6 pb-24 space-y-5">
+  <div id="viewLoading" class="rounded-cute bg-white border border-hanamu-green/20 p-6 shadow-soft text-center">
+    <p class="font-black text-hanamu-green">載入中...</p>
+  </div>
+
+  <!-- Login -->
+<section id="viewLogin" class="hidden flex items-center justify-center min-h-[70vh]">
+  <div class="w-full max-w-md card p-8 text-center">
+    <img src="https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png" class="w-24 h-24 mx-auto mb-4">
+    <div class="font-black text-xl">花沐後台管理</div>
+    <p class="text-xs text-hanamu-wood font-bold mt-1">請選擇身分後登入</p>
+
+    <div id="loginStepPick" class="mt-6 space-y-3">
+      <button id="btnPickManager" class="btn w-full bg-hanamu-green text-white py-4 rounded-2xl font-black">
+        店長登入
+      </button>
+      <button id="btnPickStaff" class="btn w-full bg-white border border-hanamu-green/30 text-hanamu-dark py-4 rounded-2xl font-black">
+        員工登入
+      </button>
+    </div>
+
+    <div id="loginStepPwd" class="hidden mt-6">
+      <div id="loginRolePill" class="px-5 py-2 rounded-full bg-hanamu-green/10 text-hanamu-green font-black text-sm"></div>
+      <input id="loginPassword" type="password"
+             class="w-full mt-4 px-4 py-4 rounded-2xl border border-hanamu-green/20 text-center font-black tracking-widest"
+             placeholder="請輸入密碼">
+      <button id="btnLogin" class="btn mt-4 w-full bg-hanamu-green text-white py-4 rounded-2xl font-black">
+        登入系統
+      </button>
+      <p id="loginError" class="hidden text-center text-xs font-black text-hanamu-red mt-3"></p>
+
+      <button id="btnSwitchRole" type="button"
+              class="mt-4 text-xs font-bold text-hanamu-wood underline">
+        ← 切換身分
+      </button>
+    </div>
+  </div>
+</section>
+  <!-- App -->
+<section id="viewApp" class="hidden space-y-4">
+
+  <!-- HERO + 搜尋 -->
+  <div class="hero-wrap space-y-4">
+    <div class="search-box">
+      <i data-lucide="search" class="w-4 h-4 text-hanamu-wood"></i>
+      <input id="searchInput" type="text" placeholder="搜尋：飼主姓名、電話、毛孩名字">
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-wrap">
+      <button id="tabRecords" class="tab-btn active">
+        <i data-lucide="scissors" class="w-4 h-4"></i> 美容契約
+      </button>
+      <button id="tabCustomers" class="tab-btn">
+        <i data-lucide="users" class="w-4 h-4"></i> 顧客管理
+      </button>
+    </div>
+
+    <!-- 筆數列 -->
+    <div class="stats-row">
+      <div>資料筆數：<span id="recordsCount" class="count">0</span></div>
+      <button id="btnRefresh"
+              class="btn px-4 py-2 rounded-full bg-white border border-hanamu-green/20 text-hanamu-green text-xs font-black">
+        重新整理
+      </button>
+    </div>
+  </div>
+
+  <!-- Records -->
+  <div id="recordsPanel" class="space-y-3">
+    <div id="recordsList" class="space-y-3"></div>
+    <div id="recordsEmpty" class="hidden text-center py-10 text-hanamu-wood font-black">沒有符合條件的紀錄</div>
+  </div>
+
+  <!-- Customers -->
+  <div id="customersPanel" class="hidden space-y-3">
+    <div id="customersList" class="space-y-3"></div>
+    <div id="customersEmpty" class="hidden text-center py-10 text-hanamu-wood font-black">尚無資料</div>
+  </div>
+</section>
+</main>
+
+<!-- 顧客詳細彈窗（高質感版） -->
+<div id="customerModal" class="fixed inset-0 z-[95] hidden">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="customerModalBackdrop"></div>
+
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="w-full max-w-3xl card overflow-hidden flex flex-col max-h-[88vh]">
+
+      <div class="p-5 bg-hanamu-bg border-b border-hanamu-green/15 flex items-center justify-between">
+        <div class="min-w-0">
+          <div class="text-xs font-black text-hanamu-wood">顧客詳細紀錄</div>
+          <div id="customerModalTitle" class="font-black text-hanamu-dark text-lg truncate"></div>
+          <div id="customerModalSub" class="text-[11px] text-hanamu-wood mt-0.5"></div>
+        </div>
+        <button id="btnCloseCustomerModal"
+                class="w-10 h-10 rounded-full bg-white border border-hanamu-green/20 flex items-center justify-center">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-5">
+        <div id="customerModalStats" class="grid sm:grid-cols-3 gap-3 text-sm font-black"></div>
+        <div id="customerModalPets" class="text-xs font-bold text-hanamu-wood"></div>
+
+        <div class="space-y-3" id="customerModalList"></div>
+
+        <div id="customerModalEmpty" class="hidden text-center py-10 text-hanamu-wood font-black">
+          查無紀錄
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 詳細 Modal（成熟版） -->
+<div id="detailModal" class="fixed inset-0 z-[100] hidden">
+  <div class="absolute inset-0 bg-black/45 backdrop-blur-sm"></div>
+
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="w-full max-w-3xl card overflow-hidden flex flex-col max-h-[90vh]">
+
+      <div class="p-5 bg-hanamu-bg border-b border-hanamu-green/20 flex items-center justify-between">
+        <div class="min-w-0">
+          <div id="detailTitle" class="font-black text-hanamu-dark text-lg truncate"></div>
+          <div id="detailStatusBadge" class="badge b-pending mt-2 inline-block">待處理</div>
+        </div>
+        <button id="btnCloseDetail"
+                class="w-10 h-10 rounded-full bg-white border border-hanamu-green/20 flex items-center justify-center">✕</button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-5">
+
+<div class="soft-card p-4">
+  <div class="section-title">訂單狀態</div>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <button class="statusBtn btn py-2 rounded-xl text-xs font-black border bg-white hover:bg-hanamu-green/5" data-status="pending">待處理</button>
+    <button class="statusBtn btn py-2 rounded-xl text-xs font-black border bg-white hover:bg-hanamu-green/5" data-status="confirmed">已確認</button>
+    <button class="statusBtn btn py-2 rounded-xl text-xs font-black border bg-white hover:bg-hanamu-green/5" data-status="completed">已完成</button>
+    <button class="statusBtn btn py-2 rounded-xl text-xs font-black border bg-white hover:bg-hanamu-green/5" data-status="cancelled">已取消</button>
+  </div>
+</div>
+<button id="btnFinishMsg"
+  class="btn w-full py-3 rounded-2xl bg-hanamu-green text-white font-black shadow-lg shadow-hanamu-green/30 flex items-center justify-center gap-2">
+  <i data-lucide="message-square" class="w-4 h-4"></i> 美容完成通知
+</button>
+
+
+<div class="soft-card p-4">
+  <div class="section-title flex items-center gap-2">
+    <i data-lucide="sticky-note" class="w-4 h-4 text-hanamu-wood"></i>
+    內部備註
+  </div>
+  <textarea id="detailNote" rows="2"
+    class="w-full px-3 py-3 rounded-xl border border-hanamu-green/20 bg-hanamu-bg focus:border-hanamu-green outline-none text-sm font-bold text-hanamu-dark"
+    placeholder="輸入店內備註，離開輸入框會自動儲存..."></textarea>
+</div>
+
+        <div id="detailOwner" class="soft-card p-4"></div>
+        <div id="detailPet" class="soft-card p-4"></div>
+        <div id="detailService" class="soft-card p-4"></div>
+        <div id="detailSignature" class="soft-card p-4"></div>
+
+
+<button id="btnDelete"
+  class="hidden btn w-full py-3 rounded-2xl bg-white border-2 border-red-200 text-red-600 font-black flex items-center justify-center gap-2">
+  <i data-lucide="trash-2" class="w-4 h-4"></i> 刪除紀錄
+</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 完工訊息（高質感版） -->
+<div id="finishModal" class="fixed inset-0 z-[110] hidden">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="w-full max-w-xl bg-white rounded-[2rem] shadow-2xl border border-hanamu-green/20 overflow-hidden flex flex-col max-h-[92vh]">
+
+      <div class="p-5 bg-hanamu-bg border-b border-hanamu-green/20 flex items-center justify-between">
+        <div class="font-black text-hanamu-dark flex items-center gap-2">
+          <i data-lucide="message-square" class="w-5 h-5 text-hanamu-green"></i>
+          完工通知
+        </div>
+        <button id="btnCloseFinish"
+                class="w-10 h-10 rounded-full bg-white border border-hanamu-green/20 flex items-center justify-center">✕</button>
+      </div>
+
+      <div class="p-6 space-y-4 overflow-y-auto">
+        <div class="soft-card p-4">
+          <div class="section-title">整體狀況</div>
+          <textarea id="finishOverall" rows="2" class="w-full px-3 py-2 rounded-xl border border-hanamu-green/20 bg-white"></textarea>
+        </div>
+
+        <div class="soft-card p-4">
+          <div class="section-title">皮膚 / 外觀狀況</div>
+          <textarea id="finishSkin" rows="2" class="w-full px-3 py-2 rounded-xl border border-hanamu-green/20 bg-white"></textarea>
+        </div>
+
+        <div class="soft-card p-4">
+          <div class="section-title">特別提醒</div>
+          <textarea id="finishExtra" rows="2" class="w-full px-3 py-2 rounded-xl border border-hanamu-green/20 bg-white"></textarea>
+        </div>
+
+        <div class="soft-card p-4">
+          <div class="section-title">本次費用</div>
+          <textarea id="finishFee" rows="1" class="w-full px-3 py-2 rounded-xl border border-hanamu-green/20 bg-white"></textarea>
+        </div>
+
+        <div class="soft-card p-4">
+          <div class="section-title">LINE 預覽</div>
+          <div id="finishPreview" class="text-sm font-bold text-hanamu-dark whitespace-pre-line"></div>
+        </div>
+
+        <button id="btnCopyFinish" class="btn w-full py-3 rounded-2xl bg-hanamu-green text-white font-black shadow-lg shadow-hanamu-green/30 flex items-center justify-center gap-2">
+          <i data-lucide="copy" class="w-4 h-4"></i> 複製訊息
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 驗證 Modal -->
+<div id="authModal" class="fixed inset-0 z-[120] hidden">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-cute shadow-soft border border-hanamu-green/20 p-6">
+      <div class="text-center mb-4">
+        <div class="font-black text-hanamu-dark">敏感操作驗證</div>
+        <div class="text-xs font-bold text-hanamu-wood">請輸入密碼</div>
+      </div>
+      <input id="authPassword" type="password" class="w-full px-4 py-3 rounded-2xl border border-hanamu-green/20 bg-white outline-none font-bold text-center tracking-widest" placeholder="••••••">
+      <p id="authError" class="hidden text-center text-xs font-black text-hanamu-red mt-2"></p>
+      <div class="grid grid-cols-2 gap-2 mt-4">
+        <button id="btnAuthCancel" class="btn py-3 rounded-xl bg-gray-100 text-gray-500 font-black">取消</button>
+        <button id="btnAuthConfirm" class="btn py-3 rounded-xl bg-hanamu-green text-white font-black">確認</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 修改密碼 Modal -->
+<div id="pwdModal" class="fixed inset-0 z-[125] hidden">
+  <div class="absolute inset-0 bg-black/50" id="pwdModalBackdrop"></div>
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-cute shadow-soft border border-hanamu-green/20 p-6">
+      <div class="text-center mb-4">
+        <div class="font-black text-hanamu-dark">修改密碼</div>
+      </div>
+      <div class="flex bg-hanamu-bg p-1 rounded-2xl mb-4 border border-hanamu-green/10">
+        <button id="btnPwdTargetManager" class="flex-1 py-2 rounded-xl text-xs font-black bg-white text-hanamu-green">管理員</button>
+        <button id="btnPwdTargetStaff" class="flex-1 py-2 rounded-xl text-xs font-black text-hanamu-wood">員工</button>
+      </div>
+      <input id="pwdOld" type="password" class="w-full px-4 py-3 rounded-2xl border border-hanamu-green/20 mb-2 text-center" placeholder="舊密碼">
+      <input id="pwdNew" type="password" class="w-full px-4 py-3 rounded-2xl border border-hanamu-green/20 mb-2 text-center" placeholder="新密碼">
+      <input id="pwdConfirm" type="password" class="w-full px-4 py-3 rounded-2xl border border-hanamu-green/20 mb-2 text-center" placeholder="確認新密碼">
+      <p id="pwdError" class="hidden text-center text-xs font-black text-hanamu-red mt-2"></p>
+      <div class="grid grid-cols-2 gap-2 mt-4">
+        <button id="btnPwdCancel" class="btn py-3 rounded-xl bg-gray-100 text-gray-500 font-black">取消</button>
+        <button id="btnPwdConfirm" class="btn py-3 rounded-xl bg-hanamu-green text-white font-black">確認修改</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://yribgjhptlmbmtrlfube.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyaWJnamhwdGxtYm10cmxmdWJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NTkwNDYsImV4cCI6MjA4OTIzNTA0Nn0.WEnfOjmurYOGYP3Fmp-UYPikyj4dy4DHpyL8_0vf2dQ";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sbPwd = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { storageKey:"sb-pwd-client", persistSession:false, autoRefreshToken:false, detectSessionInUrl:false }
+});
+
+const MANAGER_EMAIL = "hhuamu.2023@gmail.com";
+const STAFF_EMAIL = "hhuamu.2023@staff.com";
+
+let records = [];
+let selectedRecord = null;
+let selectedLoginEmail = "";
+let currentRole = "staff";
+let pendingSensitiveAction = null;
+// ===== 修改密碼 Modal 控制 =====
+let pwdTargetEmail = MANAGER_EMAIL;
+
+function openPwdModal(){
+  if(currentRole !== "manager") return;
+
+  pwdTargetEmail = MANAGER_EMAIL;
+  $("pwdOld").value = "";
+  $("pwdNew").value = "";
+  $("pwdConfirm").value = "";
+  $("pwdError").classList.add("hidden");
+
+  $("pwdModal").classList.remove("hidden");
+  $("pwdOld").focus();
+}
+
+function closePwdModal(){
+  $("pwdModal").classList.add("hidden");
+}
+const $ = id => document.getElementById(id);
+
+function normalizePayload(p){ if(typeof p==="string"){ try{return JSON.parse(p)}catch{} } return p||{}; }
+function badgeClass(status){ if(status==="confirmed") return "badge b-confirmed"; if(status==="completed") return "badge b-completed"; if(status==="cancelled") return "badge b-cancelled"; return "badge b-pending"; }
+function badgeText(status){ if(status==="confirmed") return "已確認"; if(status==="completed") return "已完成"; if(status==="cancelled") return "已取消"; return "待處理"; }
+function setStatusUI(status){
+  // badge
+  $("detailStatusBadge").className = badgeClass(status) + " mt-2 inline-block";
+  $("detailStatusBadge").textContent = badgeText(status);
+
+  // buttons
+  document.querySelectorAll(".statusBtn").forEach(btn=>{
+    btn.classList.remove("active");
+    if(btn.dataset.status === status){
+      btn.classList.add("active");
+    }
+  });
+}
+async function fetchRecords(){
+  const { data, error } = await sb.from("service_contracts")
+    .select("id,created_at,owner_phone,pet_name,payload,status,admin_note")
+    .order("created_at",{ascending:false}).limit(300);
+  if(error){ console.error(error); return; }
+  records = (data||[]).map(r=>({...r,payload:normalizePayload(r.payload)}));
+}
+
+async function handleChangePassword(){
+  $("pwdError").classList.add("hidden");
+  const oldPwd = $("pwdOld").value.trim();
+  const newPwd = $("pwdNew").value.trim();
+  const confirmPwd = $("pwdConfirm").value.trim();
+
+  if(!oldPwd || !newPwd || !confirmPwd){
+    $("pwdError").textContent = "請完整填寫所有欄位";
+    $("pwdError").classList.remove("hidden");
+    return;
+  }
+  if(newPwd.length < 6){
+    $("pwdError").textContent = "新密碼至少 6 碼";
+    $("pwdError").classList.remove("hidden");
+    return;
+  }
+  if(newPwd !== confirmPwd){
+    $("pwdError").textContent = "新密碼與確認不一致";
+    $("pwdError").classList.remove("hidden");
+    return;
+  }
+
+  try{
+    // 用獨立 sbPwd 驗證舊密碼
+    await sbPwd.auth.signOut();
+    const { error: signErr } = await sbPwd.auth.signInWithPassword({
+      email: pwdTargetEmail,
+      password: oldPwd
+    });
+    if(signErr) throw new Error("舊密碼錯誤");
+
+    const { error: upErr } = await sbPwd.auth.updateUser({ password: newPwd });
+    if(upErr) throw upErr;
+
+    await sbPwd.auth.signOut();
+    alert("✅ 密碼更新成功");
+    closePwdModal();
+  }catch(err){
+    $("pwdError").textContent = "修改失敗：" + err.message;
+    $("pwdError").classList.remove("hidden");
+  }
+}
+
+// ===== 搜尋 debounce =====
+let __searchTimer = null;
+function handleSearchInput(){
+  if(__searchTimer) clearTimeout(__searchTimer);
+  __searchTimer = setTimeout(()=>{
+    renderRecords();
+    if(!$("customersPanel").classList.contains("hidden")) renderCustomers();
+  }, 300);
+}
+
+function renderRecords(){
+  const container = $("recordsList");
+  const q = ($("searchInput").value || "").trim();
+
+  const filtered = records.filter(r=>{
+    const p = r.payload || {};
+    const owner = (p.owner_name || "").toString();
+    const phone = (r.owner_phone || p.owner_phone || "").toString();
+    const pet = (r.pet_name || p.pet_name || "").toString();
+    return !q || owner.includes(q) || phone.includes(q) || pet.includes(q);
+  });
+  container.innerHTML = "";
+  if(filtered.length===0){ 
+  $("recordsEmpty").classList.remove("hidden"); 
+  $("recordsCount").textContent = 0;
+  return; 
+}
+  $("recordsEmpty").classList.add("hidden");
+  $("recordsCount").textContent = filtered.length;
+
+  filtered.forEach(r=>{
+    const p=r.payload||{};
+    const div=document.createElement("div");
+    div.className="rounded-2xl border border-hanamu-green/15 bg-white p-4 shadow-soft cursor-pointer";
+div.innerHTML = `
+  <div class="flex justify-between items-start gap-3">
+    <div>
+      <div class="text-[10px] text-hanamu-wood font-bold mb-1">${(r.created_at||"").slice(0,16).replace("T"," ")}</div>
+      <div class="text-xl font-black">${r.pet_name||p.pet_name||"-"}</div>
+      <div class="text-xs text-hanamu-wood mt-1">${p.owner_name||"-"} ｜ ${r.owner_phone||"-"}</div>
+      <div class="text-xs text-hanamu-wood mt-1">服務：${p.service_type||"-"}</div>
+    </div>
+    <div class="text-right">
+      <div class="${badgeClass(r.status||"pending")}">${badgeText(r.status||"pending")}</div>
+    </div>
+  </div>
+`;
+    div.onclick=()=>openDetail(r.id);
+    container.appendChild(div);
+  });
+}
+
+function renderCustomers(){
+  const q = ($("searchInput").value || "").trim();
+  const groups = {};
+  records.forEach(r=>{
+    const p=r.payload||{};
+    const phone=(r.owner_phone||p.owner_phone||"").toString();
+    if(!phone) return;
+
+    const owner = (p.owner_name||"").toString();
+    const pet   = (p.pet_name||"").toString();
+
+    if(q && !owner.includes(q) && !phone.includes(q) && !pet.includes(q)) return;
+
+    if(!groups[phone]) groups[phone] = { phone, owner: p.owner_name||"-", pets:new Set(), count:0, history:[] };
+    groups[phone].pets.add(p.pet_name||"-");
+    groups[phone].count++;
+    groups[phone].history.push(r);
+  });
+  const list = Object.values(groups);
+  const container = $("customersList");
+  container.innerHTML = "";
+  if(list.length===0){ $("customersEmpty").classList.remove("hidden"); return; }
+  $("customersEmpty").classList.add("hidden");
+
+  list.forEach(c=>{
+    const div=document.createElement("div");
+div.className="card p-4 cursor-pointer hover:border-hanamu-green transition-all";
+div.innerHTML=`
+  <div class="flex items-center justify-between gap-3">
+    <div>
+      <div class="font-black text-lg">${c.owner}</div>
+      <div class="text-xs text-hanamu-wood mt-1">${c.phone}</div>
+      <div class="text-[10px] text-hanamu-wood mt-1">毛孩：${[...c.pets].join("、")}</div>
+    </div>
+    <div class="text-right">
+    <div class="text-sm font-black text-hanamu-green mt-1">累計</div>
+      <div class="text-[11px] font-black text-hanamu-wood">來訪 ${c.count} 次</div>
+    </div>
+  </div>
+`;
+    div.onclick=()=>openCustomerModal(c.phone);
+    container.appendChild(div);
+  });
+
+  if(window.lucide) lucide.createIcons();
+}
+
+function openCustomerModal(phone){
+  const modal = $("customerModal");
+  const container = $("customerModalList");
+  const list = records.filter(r => (r.owner_phone||r.payload?.owner_phone)===phone);
+  if(list.length===0) return;
+
+  const p0=list[0].payload||{};
+  $("customerModalTitle").textContent = p0.owner_name || "-";
+  $("customerModalSub").textContent = `電話：${phone}`;
+
+  $("customerModalStats").innerHTML = `
+    <div class="bg-hanamu-bg p-3 rounded-xl border text-center">來訪次數<br><span class="text-hanamu-green">${list.length}</span></div>
+    <div class="bg-hanamu-bg p-3 rounded-xl border text-center">毛孩數<br><span class="text-hanamu-wood">${new Set(list.map(r=>r.pet_name||r.payload?.pet_name)).size}</span></div>
+    <div class="bg-hanamu-bg p-3 rounded-xl border text-center">最近一次<br><span>${list[0].created_at.slice(0,10)}</span></div>
+  `;
+
+  container.innerHTML="";
+  list.forEach(r=>{
+    const p=r.payload||{};
+    const div=document.createElement("div");
+    div.className="rounded-xl border border-hanamu-green/10 p-3 bg-white cursor-pointer hover:border-hanamu-green transition";
+    div.innerHTML = `
+      <div class="font-black">${p.pet_name||"-"}</div>
+      <div class="text-xs text-hanamu-wood">${p.service_type||"-"}</div>
+      <div class="text-[10px] text-hanamu-wood">${r.created_at.slice(0,10)}</div>
+    `;
+    div.onclick=()=>{ closeCustomerModal(); openDetail(r.id); };
+    container.appendChild(div);
+  });
+
+  $("customerModalEmpty").classList.toggle("hidden", list.length!==0);
+  modal.classList.remove("hidden");
+}
+
+function closeCustomerModal(){ $("customerModal").classList.add("hidden"); }
+
+function openDetail(id){
+  const r = records.find(x=>x.id===id);
+  if(!r) return;
+  selectedRecord=r;
+  const p=r.payload||{};
+
+  $("detailTitle").textContent = `${p.pet_name||"-"} · ${r.owner_phone||"-"}`;
+$("detailOwner").innerHTML = `
+  <div class="section-title">飼主資料</div>
+  <div class="kv"><span>姓名</span><span>${p.owner_name||"-"}</span></div>
+  <div class="kv"><span>電話</span><span>${r.owner_phone||"-"}</span></div>
+  <div class="kv"><span>Email</span><span>${p.owner_email||"-"}</span></div>
+  <div class="kv"><span>身分證</span><span>${p.owner_id||"-"}</span></div>
+  <div class="kv"><span>地址</span><span>${p.owner_address||"-"}</span></div>
+  <div class="kv"><span>緊急聯絡</span><span>${p.emergency_name||"-"} (${p.emergency_phone||"-"})</span></div>
+  <div class="kv"><span>指定醫院</span><span>${p.hospital||"-"}</span></div>
+`;
+
+$("detailPet").innerHTML = `
+  <div class="section-title">寵物資料</div>
+  <div class="kv"><span>品種</span><span>${p.pet_breed||"-"}</span></div>
+  <div class="kv"><span>花色</span><span>${p.pet_color||"-"}</span></div>
+  <div class="kv"><span>年齡</span><span>${p.pet_age||"-"}</span></div>
+  <div class="kv"><span>性別</span><span>${p.pet_sex||"-"}</span></div>
+  <div class="kv"><span>結紮</span><span>${p.is_neutered||"-"}</span></div>
+  <div class="kv"><span>攻擊性</span><span>${p.is_aggressive||"-"}</span></div>
+  <div class="kv"><span>病史</span><span>${p.has_history||"-"}</span></div>
+  <div class="kv"><span>病史說明</span><span>${p.history_notes||"-"}</span></div>
+`;
+
+$("detailService").innerHTML = `
+  <div class="section-title">服務內容</div>
+  <div class="kv"><span>服務項目</span><span>${p.service_type||"-"}</span></div>
+  <div class="kv"><span>升級加購</span><span>${[p.upgrade_oral_gel,p.upgrade_carbon_bath,p.upgrade_spa_light,p.upgrade_spa_thick].filter(Boolean).join("、")||"無"}</span></div>
+  <div class="kv"><span>接回時間</span><span>${p.pickup_time||"-"}</span></div>
+`;
+
+$("detailSignature").innerHTML = `
+  <div class="section-title">簽名</div>
+  <div class="bg-white border border-hanamu-green/20 rounded-2xl p-4 flex justify-center">
+    ${p.signature_url ? `<img src="${p.signature_url}" class="max-h-[140px] object-contain"/>` : "<span class='text-sm text-hanamu-wood'>（無簽名）</span>"}
+  </div>
+  <div class="text-[10px] text-right text-hanamu-wood font-bold mt-2">
+    簽署時間：${(p.signed_at || r.created_at || "").toString().replace("T"," ").slice(0,19)}
+  </div>
+`;
+
+  $("detailNote").value = r.admin_note||"";
+  $("btnDelete").classList.toggle("hidden", currentRole!=="manager");
+setStatusUI(r.status || "pending");
+  $("detailModal").classList.remove("hidden");
+}
+
+document.querySelectorAll(".statusBtn").forEach(btn=>{
+  btn.onclick = async ()=>{
+    if(!selectedRecord) return;
+    const status = btn.dataset.status;
+
+    // 先即時反饋
+    setStatusUI(status);
+
+    // 寫入 DB
+    await sb.from("service_contracts").update({status}).eq("id",selectedRecord.id);
+
+    selectedRecord.status = status;
+    renderRecords();
+  };
+});
+
+$("detailNote").addEventListener("blur", async()=>{
+  if(!selectedRecord) return;
+  const note = $("detailNote").value;
+  await sb.from("service_contracts").update({admin_note:note}).eq("id",selectedRecord.id);
+  selectedRecord.admin_note = note;
+});
+
+$("btnDelete").onclick=()=>{
+  if(!selectedRecord) return;
+  pendingSensitiveAction = async ()=>{
+    await sb.from("service_contracts").delete().eq("id",selectedRecord.id);
+    records = records.filter(x=>x.id!==selectedRecord.id);
+    $("detailModal").classList.add("hidden");
+    renderRecords();
+  };
+  openAuthModal();
+};
+
+function buildFinishMsg(){
+  const p = selectedRecord?.payload || {};
+  const pet = p.pet_name || "毛孩";
+
+  const overall = ($("finishOverall").value || "").trim();
+  const skin    = ($("finishSkin").value || "").trim();
+  const fee     = ($("finishFee").value || "").trim();
+  const extra   = ($("finishExtra").value || "").trim();
+
+  const lines = [];
+  lines.push("【美容完成通知】");
+  lines.push(`${pet}已洗香香完成囉！`);
+
+  // ✅ 只有有內容才顯示「整體狀況」區塊
+  if (overall || skin || fee) {
+    lines.push("今日美容整體狀況如下：");
+    if (overall) lines.push(`- 整體狀況：${overall}`);
+    if (skin)    lines.push(`- 皮膚／外觀狀況：${skin}`);
+    if (fee)     lines.push(`- 費用明細：${fee}`);
+  }
+
+  // ✅ 特別提醒只有有填才顯示
+  if (extra) {
+    lines.push("");
+    lines.push("特別提醒：");
+    lines.push(extra);
+  }
+
+  lines.push("");
+  lines.push("請於通知後一小時內接回，逾時一小時以上將酌收100元逾時費喔！");
+
+  return lines.join("\n");
+}
+
+$("btnFinishMsg").onclick=()=>{ $("finishModal").classList.remove("hidden"); $("finishPreview").textContent = buildFinishMsg(); };
+["finishOverall","finishSkin","finishExtra","finishFee"].forEach(id=>$(id).addEventListener("input",()=>{$("finishPreview").textContent=buildFinishMsg();}));
+$("btnCopyFinish").onclick=async()=>{ await navigator.clipboard.writeText(buildFinishMsg()); alert("已複製"); $("finishModal").classList.add("hidden"); };
+$("btnCloseFinish").onclick=()=>{$("finishModal").classList.add("hidden");};
+
+function openAuthModal(){ $("authModal").classList.remove("hidden"); $("authPassword").value=""; }
+$("btnAuthCancel").onclick=()=>$("authModal").classList.add("hidden");
+$("btnAuthConfirm").onclick=async()=>{
+  const pwd=$("authPassword").value;
+  if(!pwd) return;
+  const { data } = await sb.auth.getUser();
+  const email=data?.user?.email;
+  const { error } = await sb.auth.signInWithPassword({ email, password: pwd });
+  if(error){ $("authError").textContent="驗證失敗"; $("authError").classList.remove("hidden"); return; }
+  $("authModal").classList.add("hidden");
+  if(pendingSensitiveAction) pendingSensitiveAction();
+};
+
+async function boot(){
+  $("viewLoading").classList.add("hidden");
+  const { data } = await sb.auth.getSession();
+  if(!data.session){ $("viewLogin").classList.remove("hidden"); return; }
+  const user = data.session.user;
+  currentRole = (user.email===MANAGER_EMAIL) ? "manager" : "staff";
+  if(currentRole==="manager") $("btnChangePwd").classList.remove("hidden");
+
+  $("topBar").classList.remove("hidden");
+  $("viewApp").classList.remove("hidden");
+  $("btnSignOut").classList.remove("hidden");
+
+  await fetchRecords();
+  renderRecords();
+  renderCustomers();
+}
+
+window.addEventListener("DOMContentLoaded", ()=>{
+$("btnPickManager").onclick=()=>{
+  selectedLoginEmail = MANAGER_EMAIL;
+  $("loginStepPick").classList.add("hidden");
+  $("loginStepPwd").classList.remove("hidden");
+  $("loginRolePill").textContent="店長模式";
+  setTimeout(()=>$("loginPassword").focus(), 50);
+};
+
+$("btnPickStaff").onclick=()=>{
+  selectedLoginEmail = STAFF_EMAIL;
+  $("loginStepPick").classList.add("hidden");
+  $("loginStepPwd").classList.remove("hidden");
+  $("loginRolePill").textContent="員工模式";
+  setTimeout(()=>$("loginPassword").focus(), 50);
+};
+
+async function doLogin(){
+  const pwd = $("loginPassword").value;
+  if(!selectedLoginEmail || !pwd){
+    $("loginError").textContent = "請輸入密碼";
+    $("loginError").classList.remove("hidden");
+    return;
+  }
+  const { error } = await sb.auth.signInWithPassword({ email:selectedLoginEmail, password:pwd });
+  if(error){
+    $("loginError").textContent = "登入失敗";
+    $("loginError").classList.remove("hidden");
+    return;
+  }
+  location.reload();
+}
+
+$("btnLogin").onclick = doLogin;
+
+  $("btnSignOut").onclick=async ()=>{await sb.auth.signOut();location.reload();}
+$("btnChangePwd").onclick = openPwdModal;
+$("btnPwdCancel").onclick = closePwdModal;
+$("pwdModalBackdrop").onclick = closePwdModal;
+
+$("btnPwdTargetManager").onclick = () => {
+  pwdTargetEmail = MANAGER_EMAIL;
+  $("btnPwdTargetManager").classList.add("bg-white","text-hanamu-green");
+  $("btnPwdTargetStaff").classList.remove("bg-white","text-hanamu-green");
+};
+
+$("btnPwdTargetStaff").onclick = () => {
+  pwdTargetEmail = STAFF_EMAIL;
+  $("btnPwdTargetStaff").classList.add("bg-white","text-hanamu-green");
+  $("btnPwdTargetManager").classList.remove("bg-white","text-hanamu-green");
+};
+
+$("btnPwdConfirm").onclick = handleChangePassword;
+$("tabRecords").onclick=()=>{
+  $("recordsPanel").classList.remove("hidden");
+  $("customersPanel").classList.add("hidden");
+  $("tabRecords").classList.add("active");
+  $("tabCustomers").classList.remove("active");
+};
+
+$("tabCustomers").onclick=()=>{
+  $("customersPanel").classList.remove("hidden");
+  $("recordsPanel").classList.add("hidden");
+  $("tabCustomers").classList.add("active");
+  $("tabRecords").classList.remove("active");
+  renderCustomers();
+};
+
+  $("btnCloseDetail").onclick=()=>{$("detailModal").classList.add("hidden");};
+  $("btnCloseCustomerModal").onclick=()=>closeCustomerModal();
+  $("customerModalBackdrop").onclick=()=>closeCustomerModal();
+$("btnSwitchRole").onclick = ()=>{
+  $("loginStepPwd").classList.add("hidden");
+  $("loginStepPick").classList.remove("hidden");
+  $("loginPassword").value = "";
+};
+$("loginPassword").addEventListener("keydown", (e)=>{
+  if(e.key === "Enter") doLogin();
+});
+$("searchInput").addEventListener("input", handleSearchInput);
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape"){
+    $("detailModal").classList.add("hidden");
+    $("customerModal").classList.add("hidden");
+    $("finishModal").classList.add("hidden");
+    $("authModal").classList.add("hidden");
+    $("pwdModal").classList.add("hidden");
+  }
+});
+if(window.lucide) lucide.createIcons();
+  boot();
+});
+</script>
+</body>
+</html>
