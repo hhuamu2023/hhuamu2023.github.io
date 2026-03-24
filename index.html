@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="format-detection" content="telephone=no" />
   <link rel="icon" href="https://yribgjhptlmbmtrlfube.supabase.co/storage/v1/object/public/logo/logo.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#C48C93">
   <title>花沐寵物沙龍｜數位美容契約</title>
 
-  <!-- Tailwind (快速做出宿洗感的卡片與排版) -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- 字體（偏溫柔可愛感） -->
@@ -19,7 +20,7 @@
 
   <!-- 簽名板 -->
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@0.287.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
@@ -399,6 +400,60 @@ background: var(--bg);
 .toast-anim{
   animation: toastIn .18s ease-out;
 }
+/* ===============================
+   ✅ Mobile UX Tuning
+   =============================== */
+html{
+  -webkit-text-size-adjust: 100%;
+}
+
+/* iOS 輸入不放大 / 增加點擊舒適度 */
+@media (max-width: 640px){
+  body{
+    background-attachment: scroll;
+  }
+
+  /* 卡片圓角稍微收斂，視覺更緊湊 */
+  .glass-card{ border-radius: 1.4rem; }
+  .cute-card{ border-radius: 1.2rem; }
+
+  /* Modal / 表單區 */
+  .modal{ height: 100dvh; }
+  .modal-body{ padding: 1rem; }
+
+  /* 可點區域最小高度 */
+  button, a{
+    min-height: 44px;
+  }
+
+  /* 防止 iOS 點輸入框自動放大 */
+  input, select, textarea, button{
+    font-size: 16px;
+  }
+
+  /* 捲動定位更舒服 */
+  input, select, textarea{
+    scroll-margin-top: 90px;
+  }
+
+  /* 主要送出按鈕更好按 */
+  .submit-cta{
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+}
+/* ✅ 防止手機左右滑動（更像 APP） */
+html, body{
+  overflow-x: hidden !important;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
+}
+/* ✅ 防止 iOS / Android 橫向拉動 */
+body{
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+}
   </style>
 </head>
 
@@ -490,7 +545,7 @@ background: var(--bg);
   <a href="https://www.facebook.com/p/%E8%8A%B1%E6%B2%90%E5%AF%B5%E7%89%A9%E6%B2%99%E9%BE%8D-100089106012166/" target="_blank" rel="noreferrer"
      class="cute-card p-5 flex items-center gap-4 hover:shadow-lg transition-all active:scale-[0.99] group">
     <div class="w-11 h-11 rounded-full bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center shrink-0 group-hover:bg-[#1877F2] group-hover:text-white transition-colors duration-300">
-      <i data-lucide="facebook" class="w-6 h-6"></i>
+            <i data-lucide="facebook" class="w-6 h-6"></i>
     </div>
     <div class="flex-1">
       <div class="text-[10px] font-black text-gray-400 tracking-widest uppercase mb-0.5">Social Media</div>
@@ -2517,7 +2572,7 @@ location.hash = "#success";
 
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("/sw.js?v=6", { scope: "/" });
+      const reg = await navigator.serviceWorker.register("/sw.js?v=7", { scope: "/" });
 
       // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
       let refreshing = false;
@@ -2575,6 +2630,28 @@ location.hash = "#success";
       console.warn("Service Worker 註冊失敗：", err);
     }
   });
+})();
+</script>
+<script>
+// ✅ 行動端：輸入框自動捲到可視區（避免鍵盤擋住）
+(function(){
+  if(window.innerWidth > 768) return;
+
+  function ensureInView(el){
+    setTimeout(()=>{
+      try{
+        el.scrollIntoView({ behavior:"smooth", block:"center" });
+      }catch(e){}
+    }, 280);
+  }
+
+  document.addEventListener("focusin", (e)=>{
+    const t = e.target;
+    if(!t) return;
+    if(t.tagName==="INPUT" || t.tagName==="TEXTAREA" || t.tagName==="SELECT"){
+      ensureInView(t);
+    }
+  }, true);
 })();
 </script>
 </body>

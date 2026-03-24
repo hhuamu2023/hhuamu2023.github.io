@@ -498,6 +498,20 @@ const $ = id => document.getElementById(id);
 function normalizePayload(p){ if(typeof p==="string"){ try{return JSON.parse(p)}catch{} } return p||{}; }
 function badgeClass(status){ if(status==="confirmed") return "badge b-confirmed"; if(status==="completed") return "badge b-completed"; if(status==="cancelled") return "badge b-cancelled"; return "badge b-pending"; }
 function badgeText(status){ if(status==="confirmed") return "已確認"; if(status==="completed") return "已完成"; if(status==="cancelled") return "已取消"; return "待處理"; }
+
+// ✅ 台灣時區格式化（顯示用）
+function fmtTW(iso, withSec=false){
+  if(!iso) return "-";
+  const opt = {
+    timeZone: "Asia/Taipei",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit",
+    hour12: false
+  };
+  if(withSec) opt.second = "2-digit";
+  return new Intl.DateTimeFormat("zh-TW", opt).format(new Date(iso)).replace(/\//g,"-");
+}
+
 function setStatusUI(status){
   // badge
   $("detailStatusBadge").className = badgeClass(status) + " mt-2 inline-block";
@@ -599,7 +613,7 @@ function renderRecords(){
 div.innerHTML = `
   <div class="flex justify-between items-start gap-3">
     <div>
-      <div class="text-[10px] text-hanamu-wood font-bold mb-1">${(r.created_at||"").slice(0,16).replace("T"," ")}</div>
+      <div class="text-[10px] text-hanamu-wood font-bold mb-1">${fmtTW(r.created_at)}</div>
       <div class="text-xl font-black">${r.pet_name||p.pet_name||"-"}</div>
       <div class="text-xs text-hanamu-wood mt-1">${p.owner_name||"-"} ｜ ${r.owner_phone||"-"}</div>
       <div class="text-xs text-hanamu-wood mt-1">服務：${p.service_type||"-"}</div>
@@ -674,7 +688,7 @@ function openCustomerModal(phone){
   $("customerModalStats").innerHTML = `
     <div class="bg-hanamu-bg p-3 rounded-xl border text-center">來訪次數<br><span class="text-hanamu-green">${list.length}</span></div>
     <div class="bg-hanamu-bg p-3 rounded-xl border text-center">毛孩數<br><span class="text-hanamu-wood">${new Set(list.map(r=>r.pet_name||r.payload?.pet_name)).size}</span></div>
-    <div class="bg-hanamu-bg p-3 rounded-xl border text-center">最近一次<br><span>${list[0].created_at.slice(0,10)}</span></div>
+    <div class="bg-hanamu-bg p-3 rounded-xl border text-center">最近一次<br><span>${fmtTW(list[0].created_at).slice(0,10)}</span></div>
   `;
 
   container.innerHTML="";
@@ -685,7 +699,7 @@ function openCustomerModal(phone){
     div.innerHTML = `
       <div class="font-black">${p.pet_name||"-"}</div>
       <div class="text-xs text-hanamu-wood">${p.service_type||"-"}</div>
-      <div class="text-[10px] text-hanamu-wood">${r.created_at.slice(0,10)}</div>
+      <div class="text-[10px] text-hanamu-wood">${fmtTW(r.created_at).slice(0,10)}</div>
     `;
     div.onclick=()=>{ closeCustomerModal(); openDetail(r.id); };
     container.appendChild(div);
@@ -740,7 +754,7 @@ $("detailSignature").innerHTML = `
     ${p.signature_url ? `<img src="${p.signature_url}" class="max-h-[140px] object-contain"/>` : "<span class='text-sm text-hanamu-wood'>（無簽名）</span>"}
   </div>
   <div class="text-[10px] text-right text-hanamu-wood font-bold mt-2">
-    簽署時間：${(p.signed_at || r.created_at || "").toString().replace("T"," ").slice(0,19)}
+    簽署時間：${fmtTW(p.signed_at || r.created_at, true)}
   </div>
 `;
 
@@ -946,5 +960,87 @@ if(window.lucide) lucide.createIcons();
   boot();
 });
 </script>
+<script>
+
+(function () {
+  if (!("serviceWorker" in navigator)) return;
+
+  function canAutoReloadNow() {
+    // 填表頁盡量不要自動刷新，避免使用者填到一半資料消失
+    const hash = location.hash || "#home";
+    const inGrooming = hash.includes("grooming");
+    return !inGrooming;
+  }
+
+  function toast(type, text, subText) {
+    // 你有 showMsg 就用它；沒有也不會報錯
+    try {
+      if (typeof showMsg === "function") showMsg(type, text, subText);
+    } catch (e) {}
+  }
+
+  window.addEventListener("load", async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js?v=7", { scope: "/" });
+
+      // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+
+      // 若一進來就已經有 waiting（代表背景已下載好新版本）
+      if (reg.waiting) {
+        if (canAutoReloadNow()) {
+          reg.waiting.postMessage({ type: "SKIP_WAITING" });
+        } else {
+          toast(
+  "ok",
+  "✅ 偵測到新版本",
+  "建議將此頁重新整理以套用最新版本"
+);
+        }
+      }
+
+      // 偵測更新流程
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+
+        newWorker.addEventListener("statechange", () => {
+          // state === installed 且已有舊 controller，表示「有新版本」且已下載完成，正在 waiting
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            if (reg.waiting) {
+              if (canAutoReloadNow()) {
+                reg.waiting.postMessage({ type: "SKIP_WAITING" });
+              } else {
+                toast(
+  "ok",
+  "✅ 偵測到新版本",
+  "建議將此頁重新整理以套用最新版本"
+);
+              }
+            }
+          }
+        });
+      });
+
+      // 主動定期檢查更新（30 分鐘一次）
+      setInterval(() => {
+        reg.update().catch(() => {});
+      }, 30 * 60 * 1000);
+
+      // 首次也更新一次（避免太久才更新）
+      reg.update().catch(() => {});
+
+    } catch (err) {
+      console.warn("Service Worker 註冊失敗：", err);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
