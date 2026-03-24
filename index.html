@@ -1029,7 +1029,7 @@ body{
       <div class="mt-2 bg-white rounded-2xl border border-hanamu-wood/10 p-4 space-y-2">
         <div>
           <span class="text-gray-400 font-bold block text-[11px]">特約動物醫院</span>
-          <span class="font-black" id="shop_er_name">明倫動物醫院</span>
+          <span class="font-black" id="shop_er_name">名倫動物醫院</span>
         </div>
 
         <div>
@@ -2572,7 +2572,7 @@ location.hash = "#success";
 
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("/sw.js?v=7", { scope: "/" });
+      const reg = await navigator.serviceWorker.register("/sw.js?v=8", { scope: "/" });
 
       // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
       let refreshing = false;
