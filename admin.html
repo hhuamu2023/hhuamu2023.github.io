@@ -616,7 +616,7 @@ div.innerHTML = `
       <div class="text-[10px] text-hanamu-wood font-bold mb-1">${fmtTW(r.created_at)}</div>
       <div class="text-xl font-black">${r.pet_name||p.pet_name||"-"}</div>
       <div class="text-xs text-hanamu-wood mt-1">${p.owner_name||"-"} ｜ ${r.owner_phone||"-"}</div>
-      <div class="text-xs text-hanamu-wood mt-1">服務：${p.service_type||"-"}</div>
+        <div class="text-xs text-hanamu-wood mt-1">服務：${p.service_type||"-"}</div>
     </div>
     <div class="text-right">
       <div class="${badgeClass(r.status||"pending")}">${badgeText(r.status||"pending")}</div>
@@ -742,7 +742,7 @@ $("detailPet").innerHTML = `
 `;
 
 $("detailService").innerHTML = `
-  <div class="section-title">服務內容</div>
+  <div class="kv"><span>服務日期</span><span>${p.service_date||"-"}</span></div>
   <div class="kv"><span>服務項目</span><span>${p.service_type||"-"}</span></div>
   <div class="kv"><span>升級加購</span><span>${[p.upgrade_oral_gel,p.upgrade_carbon_bath,p.upgrade_spa_light,p.upgrade_spa_thick].filter(Boolean).join("、")||"無"}</span></div>
   <div class="kv"><span>接回時間</span><span>${p.pickup_time||"-"}</span></div>
@@ -981,7 +981,7 @@ if(window.lucide) lucide.createIcons();
 
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("/sw.js?v=7", { scope: "/" });
+      const reg = await navigator.serviceWorker.register("/sw.js?v=9", { scope: "/" });
 
       // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
       let refreshing = false;

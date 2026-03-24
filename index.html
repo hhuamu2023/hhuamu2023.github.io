@@ -837,6 +837,13 @@ body{
     <h3 class="text-lg font-black text-hanamu-dark">本次服務內容<span class="text-red-500">*</span></h3>
   </div>
 
+  <!-- ✅ 服務日期 -->
+  <div>
+    <label class="text-sm font-black text-hanamu-wood">服務日期 <span class="text-red-500">*</span></label>
+    <input type="date" name="service_date" id="serviceDate" required
+           class="mt-2 w-full cute-input px-4 py-3" />
+  </div>
+
   <!-- 服務項目（單選） -->
   <div class="grid sm:grid-cols-2 gap-3">
     
@@ -1572,6 +1579,10 @@ document.getElementById("pickupTime")?.addEventListener("input", () => {
   if(otherDesc) otherDesc.value = "";
   if(otherArea) otherArea.classList.add("hidden");
 
+  // ✅ 服務日期預設今天（舊客帶入後）
+  const serviceDateEl = document.getElementById("serviceDate");
+  if(serviceDateEl) serviceDateEl.value = getTodayISO();
+
   // 6) 清空接回時間（回到「非另行通知」狀態）
   try{
     if(typeof isNotifyLater !== "undefined" && isNotifyLater && typeof togglePickupTimeMode === "function"){
@@ -1771,6 +1782,7 @@ renderRoute();
 // 初始化首頁 Lucide icons
 window.addEventListener("DOMContentLoaded", () => {
   if (window.lucide) window.lucide.createIcons();
+  setServiceDateDefault();
 });
   // ====== 條款 Modal：滑到底才可同意 ======
   const termsBackdrop = document.getElementById("termsBackdrop");
@@ -1845,6 +1857,22 @@ function closeTerms(){
     closeTerms();
     refreshSigLock();
   });
+// ✅ 取得今天日期（YYYY-MM-DD）
+function getTodayISO(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+// ✅ 服務日期預設今天
+function setServiceDateDefault(){
+  const el = document.getElementById("serviceDate");
+  if(!el) return;
+  if(!el.value) el.value = getTodayISO();
+}
+
 // ✅ 只留數字（手機/電話/晶片）
 function digitsOnly(input){
   input.value = (input.value || "").replace(/[^\d]/g, "");
@@ -2190,6 +2218,7 @@ function buildContractHtml(payload, shopInfo, termsHtml, meta = {}){
   const upgradeText = upgrades.length ? upgrades.join("、") : "無";
 
   const pickupText = p.pickup_time || "—";
+  const serviceDateText = p.service_date || "—";
 
   const title = "花沐寵物沙龍｜美容契約副本";
 
@@ -2300,6 +2329,7 @@ function buildContractHtml(payload, shopInfo, termsHtml, meta = {}){
       <!-- Service -->
       <h3 style="margin:0 0 8px;font-size:14px;color:#9B7A5E;">本次服務內容</h3>
       <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        ${row("服務日期", serviceDateText)}
         ${row("服務項目", serviceText)}
         ${row("升級加購", upgradeText)}
         ${row("接回時間", pickupText)}
@@ -2356,6 +2386,16 @@ if(serviceType === "其他項目"){
     showMsg("err", "⚠️ 請填寫「其他項目」的服務說明。");
     return;
   }
+}
+
+// ✅ 服務日期必填
+const serviceDateEl = form.querySelector('input[name="service_date"]');
+const serviceDate = (serviceDateEl?.value || "").trim();
+if(!serviceDate){
+  showMsg("err", "⚠️ 請選擇服務日期。");
+  document.getElementById("secService")?.scrollIntoView({ behavior:"smooth", block:"center" });
+  serviceDateEl?.focus?.();
+  return;
 }
 // ✅ 接回時間必填驗證：沒選時間也沒按「另行通知」就擋
 const pickupTimeEl = document.getElementById("pickupTime");
@@ -2572,7 +2612,7 @@ location.hash = "#success";
 
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("/sw.js?v=8", { scope: "/" });
+      const reg = await navigator.serviceWorker.register("/sw.js?v=9", { scope: "/" });
 
       // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
       let refreshing = false;
