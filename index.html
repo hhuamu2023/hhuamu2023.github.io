@@ -45,7 +45,7 @@ colors: {
     }
   </script>
 
-  <style>
+<style>
 :root{
   --bg: #FFF7F5;
   --text: #2B2B2B;
@@ -56,6 +56,7 @@ body{
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
+  overflow-y: scroll;  /* 改為 scroll，強制保留滾動條空間，避免雙重滾動 */
 
   /* ✅ 粉霧漸層底：不靠毛玻璃，也有氛圍 */
   background-color: var(--bg);
@@ -362,6 +363,10 @@ background: var(--bg);
   width: calc(100% - 24px);
   max-width: 520px;
   display: none;
+  pointer-events: none; /* 讓點擊穿透，不阻擋滾動 */
+}
+#toast .toast-card{
+  pointer-events: auto; /* 卡片本身可點擊，但 toast 容器不阻擋 */
 }
 
 .toast-card{
@@ -411,6 +416,8 @@ html{
 @media (max-width: 640px){
   body{
     background-attachment: scroll;
+    overflow-y: auto !important;  /* 改回 auto，手機上滾動更自然 */
+    -webkit-overflow-scrolling: touch;
   }
 
   /* 卡片圓角稍微收斂，視覺更緊湊 */
@@ -443,18 +450,22 @@ html{
   }
 }
 /* ✅ 防止手機左右滑動（更像 APP） */
-html, body{
+html{
   overflow-x: hidden !important;
+  overflow-y: auto;  /* 改為 auto，讓瀏覽器自然處理 */
   overscroll-behavior-x: none;
-  touch-action: pan-y;
 }
-/* ✅ 防止 iOS / Android 橫向拉動 */
+/* ✅ body 控制所有滾動，只有一個滾動條 */
 body{
-  position: relative;
+  position: static;  /* 改為 static，不要干擾滾動 */
   width: 100%;
   max-width: 100%;
+  overflow-y: scroll;  /* 改為 scroll，保持與上方一致 */
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: manipulation;
 }
-  </style>
+</style>
 </head>
 
 <body>
@@ -2014,6 +2025,17 @@ function lockPageScroll(){
   document.body.style.left = "0";
   document.body.style.right = "0";
   document.body.style.width = "100%";
+  document.body.style.overflowY = "hidden";  // 鎖定時禁止滾動
+}
+
+function unlockPageScroll(){
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.width = "";
+  document.body.style.overflowY = "";  // 恢復滾動
+  window.scrollTo(0, __scrollY);
 }
 
 function unlockPageScroll(){
@@ -2612,7 +2634,7 @@ location.hash = "#success";
 
   window.addEventListener("load", async () => {
     try {
-      const reg = await navigator.serviceWorker.register("/sw.js?v=9", { scope: "/" });
+      const reg = await navigator.serviceWorker.register("/sw.js?v=10", { scope: "/" });
 
       // 只要 SW 控制權換人（新 SW 啟用），就重新整理到新版本
       let refreshing = false;
